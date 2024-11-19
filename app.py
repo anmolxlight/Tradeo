@@ -202,12 +202,7 @@ def main():
         else:
             st.warning("⚠️ Please enter a stock ticker")
 
-    # Footer
-    st.markdown("""
-        <div style='text-align: center; padding: 20px;'>
-            <p>Built with Streamlit • Data from Yahoo Finance • Analysis by Perplexity AI</p>
-        </div>
-    """, unsafe_allow_html=True)
+   
 
 if __name__ == "__main__":
     main()
