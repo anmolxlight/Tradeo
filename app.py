@@ -137,7 +137,7 @@ def create_price_chart(historical_data):
     return fig
 
 def main():
-    st.set_page_config(page_title="Stock Analysis Dashboard", layout="wide")
+    st.set_page_config(page_title="TRADEO", layout="wide")
     
     # Custom CSS
     st.markdown("""
@@ -151,50 +151,44 @@ def main():
             padding: 10px;
             border-radius: 5px;
         }
-        .analysis-container {
-            max-width: 900px;
+        .analysis-text {
+            text-align: center;
+            max-width: 800px;
             margin: 0 auto;
             padding: 20px;
-            background-color: #1E1E1E;
-            border-radius: 10px;
-            line-height: 1.6;
         }
-        .analysis-container h2 {
-            color: #00ff88;
-            margin-top: 20px;
-            margin-bottom: 10px;
-            font-size: 1.5em;
+        .stButton>button {
+            width: 100%;
+            height: 100%;
         }
-        .analysis-container h3 {
-            color: #00bbff;
-            margin-top: 15px;
-            margin-bottom: 8px;
+        .title-container {
+            text-align: center;
+            padding: 1rem 0;
+            margin-bottom: 2rem;
         }
-        .analysis-container ul {
-            margin-left: 20px;
-            margin-bottom: 15px;
-        }
-        .analysis-container li {
-            margin-bottom: 5px;
-        }
-        .recommendation {
-            background-color: #2d2d2d;
-            padding: 15px;
-            border-radius: 5px;
-            margin: 10px 0;
+        .search-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 1rem;
         }
         </style>
     """, unsafe_allow_html=True)
     
-    # Main content
-    st.title("🚀 Stock Analysis Dashboard")
+    # Centered title
+    st.markdown('<div class="title-container"><h1>🚀 TRADEO</h1></div>', unsafe_allow_html=True)
     
-    # Input section
-    col1, col2 = st.columns([2, 1])
+    # Search container with aligned input and button
+    st.markdown('<div class="search-container">', unsafe_allow_html=True)
+    col1, col2 = st.columns([4, 1])
     with col1:
-        ticker = st.text_input("Enter Stock Ticker:", "").upper()
+        ticker = st.text_input("Enter Stock Ticker:", "", key="ticker_input").upper()
     with col2:
-        analyze_button = st.button("Analyze 📊", type="primary")
+        analyze_button = st.button("Analyze 📊", type="primary", key="analyze_button")
+    st.markdown('</div>', unsafe_allow_html=True)
     
     if analyze_button or ticker:
         if ticker:
