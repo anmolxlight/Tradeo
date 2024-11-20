@@ -90,10 +90,7 @@ class StockSentimentAnalyzer:
             Format the response with clear headers and bullet points.
             """
         else:
-            prompt = f"""
-            Analyze the investment potential for {ticker} stock as of {current_date}.
-            [Previous else block content remains the same]
-            """
+            prompt = f"Analyze the investment potential for {ticker} stock as of {current_date}."
         
         messages = [
             {
@@ -139,16 +136,30 @@ def create_price_chart(historical_data):
 def main():
     st.set_page_config(page_title="TRADEO", layout="wide")
     
-    # Enhanced Custom CSS
+    # Custom CSS
     st.markdown("""
         <style>
-        /* Base styles */
         .stApp {
             background-color: #0e1117;
             color: #ffffff;
         }
         
-        /* Title and tagline */
+        .section-header {
+            color: #4FD1C5;
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin: 2rem 0 1rem 0;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #4FD1C5;
+        }
+        
+        .stMetric {
+            background-color: rgba(45, 55, 72, 0.7);
+            padding: 1.5rem;
+            border-radius: 8px;
+            border-top: 4px solid #4FD1C5;
+        }
+        
         .title-container {
             text-align: center;
             padding: 2rem 0;
@@ -168,102 +179,35 @@ def main():
             margin-top: -0.5rem;
         }
         
-        /* Analysis sections */
-        .analysis-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 2rem;
-        }
-        
-        .section-header {
-            color: #4FD1C5;
-            font-size: 1.8rem;
-            font-weight: bold;
-            margin: 2rem 0 1rem 0;
-            padding-bottom: 0.5rem;
-            border-bottom: 2px solid #4FD1C5;
-        }
-        
-        .subsection-header {
-            color: #90CDF4;
-            font-size: 1.4rem;
-            font-weight: 600;
-            margin: 1.5rem 0 1rem 0;
-        }
-        
-        .financial-ratio {
-            background: rgba(45, 55, 72, 0.5);
+        .markdown-text-container {
+            line-height: 1.6;
+            color: #E2E8F0;
             padding: 1rem;
+            background: rgba(45, 55, 72, 0.3);
             border-radius: 8px;
-            margin: 0.5rem 0;
-            border-left: 4px solid #4FD1C5;
         }
         
-        .ratio-label {
-            color: #A0AEC0;
-            font-size: 0.9rem;
+        .markdown-text-container h1, 
+        .markdown-text-container h2, 
+        .markdown-text-container h3 {
+            color: #4FD1C5;
         }
         
-        .ratio-value {
-            color: #fff;
-            font-size: 1.1rem;
-            font-weight: 600;
-        }
-        
-        /* Metrics styling */
-        .stMetric {
-            background-color: rgba(45, 55, 72, 0.7);
-            padding: 1.5rem;
-            border-radius: 8px;
-            border-top: 4px solid #4FD1C5;
-        }
-        
-        /* Search container */
-        .search-container {
-            max-width: 1000px;
-            margin: 0 auto;
-            padding: 0 1rem;
+        .markdown-text-container strong {
+            color: #90CDF4;
         }
         
         .stButton>button {
-            height: 2.75rem;
-            background-color: #4FD1C5;
-            color: #1A202C;
+            background-color: #4FD1C5 !important;
+            color: #1A202C !important;
             font-weight: 600;
+            height: 2.75rem;
         }
         
         .stTextInput input {
             height: 2.75rem;
             background-color: rgba(45, 55, 72, 0.7);
             border-color: #4FD1C5;
-        }
-        
-        /* Analysis text content */
-        .analysis-text h1 {
-            color: #4FD1C5;
-            font-size: 1.8rem;
-            margin: 2rem 0 1rem 0;
-        }
-        
-        .analysis-text h2 {
-            color: #90CDF4;
-            font-size: 1.4rem;
-            margin: 1.5rem 0 1rem 0;
-        }
-        
-        .analysis-text li {
-            margin: 0.5rem 0;
-            line-height: 1.6;
-        }
-        
-        /* Format markdown content */
-        .markdown-text-container {
-            line-height: 1.6;
-            color: #E2E8F0;
-        }
-        
-        .markdown-text-container strong {
-            color: #90CDF4;
         }
         </style>
     """, unsafe_allow_html=True)
@@ -272,19 +216,16 @@ def main():
     st.markdown("""
         <div class="title-container">
             <h1>🚀 TRADEO</h1>
-            <p class="tagline">stocks made simple fr📈</p>
+            <p class="tagline">stonks made simple fr fr 📈</p>
         </div>
     """, unsafe_allow_html=True)
     
     # Search container
-    st.markdown('<div class="search-container">', unsafe_allow_html=True)
     col1, col2 = st.columns([5, 1])
-    
     with col1:
         ticker = st.text_input("Enter Stock Ticker:", "", key="ticker_input", label_visibility="collapsed").upper()
     with col2:
         analyze_button = st.button("Analyze 📊", type="primary", use_container_width=True)
-    st.markdown('</div>', unsafe_allow_html=True)
 
     if analyze_button or ticker:
         if ticker:
@@ -296,25 +237,23 @@ def main():
                     analysis, stock_data = analyzer.analyze_sentiment(ticker)
                     
                     if stock_data:
-                        # Display metrics in a more appealing way
+                        # Display metrics
                         st.markdown('<h2 class="section-header">📈 Key Metrics</h2>', unsafe_allow_html=True)
-                        metrics_container = st.container()
-                        with metrics_container:
-                            col1, col2, col3, col4 = st.columns(4)
-                            with col1:
-                                st.metric("Current Price", f"${stock_data['current_price']:.2f}")
-                            with col2:
-                                st.metric("Target Price", f"${stock_data['target_price']:.2f}")
-                            with col3:
-                                st.metric("PE Ratio", f"{stock_data['pe_ratio']:.2f}")
-                            with col4:
-                                st.metric("1-Month Change", f"{stock_data['price_change']:.2f}%")
+                        col1, col2, col3, col4 = st.columns(4)
+                        with col1:
+                            st.metric("Current Price", f"${stock_data['current_price']:.2f}")
+                        with col2:
+                            st.metric("Target Price", f"${stock_data['target_price']:.2f}")
+                        with col3:
+                            st.metric("PE Ratio", f"{stock_data['pe_ratio']:.2f}")
+                        with col4:
+                            st.metric("1-Month Change", f"{stock_data['price_change']:.2f}%")
                         
                         # Display chart
                         st.markdown('<h2 class="section-header">📊 Price Chart</h2>', unsafe_allow_html=True)
                         st.plotly_chart(create_price_chart(stock_data['historical_data']), use_container_width=True)
                         
-                        # Display analysis with enhanced formatting
+                        # Display analysis
                         st.markdown('<h2 class="section-header">📝 Analysis Report</h2>', unsafe_allow_html=True)
                         st.markdown(f'<div class="markdown-text-container">{analysis}</div>', unsafe_allow_html=True)
                     
