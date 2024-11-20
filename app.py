@@ -158,8 +158,9 @@ def main():
             padding: 20px;
         }
         .stButton>button {
-            width: 100%;
-            height: 100%;
+            height: 2.75rem;
+            margin-top: 0;
+            padding: 0.5rem 1rem;
         }
         .title-container {
             text-align: center;
@@ -167,28 +168,40 @@ def main():
             margin-bottom: 2rem;
         }
         .search-container {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 1rem;
             max-width: 1000px;
             margin: 0 auto;
             padding: 0 1rem;
+        }
+        /* Fix for input field height */
+        .stTextInput input {
+            height: 2.75rem;
+        }
+        /* Ensure columns are properly aligned */
+        .row-widget.stButton {
+            height: 2.75rem;
         }
         </style>
     """, unsafe_allow_html=True)
     
     # Centered title
-    st.markdown('<div class="title-container"><h1>🚀 TRADEO</h1></div>', unsafe_allow_html=True)
+    # Centered title with tagline
+st.markdown("""
+    <div class="title-container">
+        <h1>🚀 TRADEO</h1>
+        <p style="font-size: 1.2rem; margin-top: -0.5rem; color: #FF6B6B;">stocks made simple fr 📈</p>
+    </div>
+""", unsafe_allow_html=Tru
     
-    # Search container with aligned input and button
+    # Search container with better column proportions
     st.markdown('<div class="search-container">', unsafe_allow_html=True)
-    col1, col2 = st.columns([4, 1])
+    col1, col2 = st.columns([5, 1])  # Adjusted ratio for better spacing
+    
     with col1:
-        ticker = st.text_input("Enter Stock Ticker:", "", key="ticker_input").upper()
+        ticker = st.text_input("Enter Stock Ticker:", "", key="ticker_input", label_visibility="collapsed").upper()
     with col2:
-        analyze_button = st.button("Analyze 📊", type="primary", key="analyze_button")
+        analyze_button = st.button("Analyze 📊", type="primary", use_container_width=True)
     st.markdown('</div>', unsafe_allow_html=True)
+   
     
     if analyze_button or ticker:
         if ticker:
