@@ -151,37 +151,34 @@ def main():
             padding: 10px;
             border-radius: 5px;
         }
-        .analysis-container {
-            max-width: 900px;
+        .analysis-text {
+            text-align: center;
+            max-width: 800px;
             margin: 0 auto;
             padding: 20px;
-            background-color: #1E1E1E;
-            border-radius: 10px;
-            line-height: 1.6;
         }
-        .analysis-container h2 {
-            color: #00ff88;
-            margin-top: 20px;
-            margin-bottom: 10px;
-            font-size: 1.5em;
+        .stButton>button {
+            height: 2.75rem;
+            margin-top: 0;
+            padding: 0.5rem 1rem;
         }
-        .analysis-container h3 {
-            color: #00bbff;
-            margin-top: 15px;
-            margin-bottom: 8px;
+        .title-container {
+            text-align: center;
+            padding: 1rem 0;
+            margin-bottom: 2rem;
         }
-        .analysis-container ul {
-            margin-left: 20px;
-            margin-bottom: 15px;
+        .search-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 1rem;
         }
-        .analysis-container li {
-            margin-bottom: 5px;
+        /* Fix for input field height */
+        .stTextInput input {
+            height: 2.75rem;
         }
-        .recommendation {
-            background-color: #2d2d2d;
-            padding: 15px;
-            border-radius: 5px;
-            margin: 10px 0;
+        /* Ensure columns are properly aligned */
+        .row-widget.stButton {
+            height: 2.75rem;
         }
         </style>
     """, unsafe_allow_html=True)
