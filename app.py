@@ -90,10 +90,7 @@ class StockSentimentAnalyzer:
             Format the response with clear headers and bullet points.
             """
         else:
-            prompt = f"""
-            Analyze the investment potential for {ticker} stock as of {current_date}.
-            [Previous else block content remains the same]
-            """
+            prompt = f"Analyze the investment potential for {ticker} stock as of {current_date}."
         
         messages = [
             {
@@ -139,70 +136,87 @@ def create_price_chart(historical_data):
 def main():
     st.set_page_config(page_title="TRADEO", layout="wide")
     
-    # Custom CSS
+    # Custom CSS from the first code
     st.markdown("""
         <style>
         .stApp {
             background-color: #0e1117;
             color: #ffffff;
         }
+        
+        .section-header {
+            color: #4FD1C5;
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin: 2rem 0 1rem 0;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #4FD1C5;
+        }
+        
         .stMetric {
-            background-color: #1f2937;
-            padding: 10px;
-            border-radius: 5px;
+            background-color: rgba(45, 55, 72, 0.7);
+            padding: 1.5rem;
+            border-radius: 8px;
+            border-top: 4px solid #4FD1C5;
         }
-        .analysis-text {
-            text-align: center;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        .stButton>button {
-            height: 2.75rem;
-            margin-top: 0;
-            padding: 0.5rem 1rem;
-        }
+        
         .title-container {
             text-align: center;
-            padding: 1rem 0;
+            padding: 2rem 0;
             margin-bottom: 2rem;
+            background: linear-gradient(90deg, rgba(14,17,23,0) 0%, rgba(14,17,23,0.8) 50%, rgba(14,17,23,0) 100%);
         }
-        .search-container {
-            max-width: 1000px;
-            margin: 0 auto;
-            padding: 0 1rem;
+        
+        .title-container h1 {
+            color: #fff;
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
         }
-        /* Fix for input field height */
+        
+        .tagline {
+            color: #FF6B6B;
+            font-size: 1.2rem;
+            margin-top: -0.5rem;
+        }
+        
+        .markdown-text-container {
+            line-height: 1.6;
+            color: #E2E8F0;
+            padding: 1rem;
+            background: rgba(45, 55, 72, 0.3);
+            border-radius: 8px;
+        }
+        
+        .stButton>button {
+            background-color: #4FD1C5 !important;
+            color: #1A202C !important;
+            font-weight: 600;
+            height: 2.75rem;
+        }
+        
         .stTextInput input {
             height: 2.75rem;
-        }
-        /* Ensure columns are properly aligned */
-        .row-widget.stButton {
-            height: 2.75rem;
+            background-color: rgba(45, 55, 72, 0.7);
+            border-color: #4FD1C5;
         }
         </style>
     """, unsafe_allow_html=True)
     
-    # Centered title
-    # Centered title with tagline
+    # Title and tagline
     st.markdown("""
-    <div class="title-container">
-        <h1>🚀 TRADEO</h1>
-        <p style="font-size: 1.2rem; margin-top: -0.5rem; color: #FF6B6B;">stonks made simple fr 📈</p>
-    </div>
-""", unsafe_allow_html=True)
+        <div class="title-container">
+            <h1>🚀 TRADEO</h1>
+            <p class="tagline">stonks made simple fr fr 📈</p>
+        </div>
+    """, unsafe_allow_html=True)
     
-    # Search container with better column proportions
-    st.markdown('<div class="search-container">', unsafe_allow_html=True)
-    col1, col2 = st.columns([5, 1])  # Adjusted ratio for better spacing
-    
+    # Search container
+    col1, col2 = st.columns([5, 1])
     with col1:
         ticker = st.text_input("Enter Stock Ticker:", "", key="ticker_input", label_visibility="collapsed").upper()
     with col2:
         analyze_button = st.button("Analyze 📊", type="primary", use_container_width=True)
-    st.markdown('</div>', unsafe_allow_html=True)
-   
-    
+
     if analyze_button or ticker:
         if ticker:
             try:
@@ -214,7 +228,7 @@ def main():
                     
                     if stock_data:
                         # Display metrics
-                        st.markdown("<h2 style='text-align: center;'>📈 Key Metrics</h2>", unsafe_allow_html=True)
+                        st.markdown('<h2 class="section-header">📈 Key Metrics</h2>', unsafe_allow_html=True)
                         col1, col2, col3, col4 = st.columns(4)
                         with col1:
                             st.metric("Current Price", f"${stock_data['current_price']:.2f}")
@@ -226,17 +240,17 @@ def main():
                             st.metric("1-Month Change", f"{stock_data['price_change']:.2f}%")
                         
                         # Display chart
-                        st.markdown("<h2 style='text-align: center;'>📊 Price Chart</h2>", unsafe_allow_html=True)
+                        st.markdown('<h2 class="section-header">📊 Price Chart</h2>', unsafe_allow_html=True)
                         st.plotly_chart(create_price_chart(stock_data['historical_data']), use_container_width=True)
-                    
-                    # Display analysis
-                    st.markdown("<h2 style='text-align: center;'>📝 Analysis Report</h2>", unsafe_allow_html=True)
-                    st.markdown(f"<div class='analysis-container'>{analysis}</div>", unsafe_allow_html=True)
+                        
+                        # Display analysis
+                        st.markdown('<h2 class="section-header">📝 Analysis Report</h2>', unsafe_allow_html=True)
+                        st.markdown(f'<div class="markdown-text-container">{analysis}</div>', unsafe_allow_html=True)
                     
             except Exception as e:
-                st.error(f"Error analyzing {ticker}: {str(e)}")
+                st.error(f"Error: {e}")
         else:
-            st.warning("⚠️ Please enter a stock ticker")
+            st.error("Please enter a valid stock ticker.")
 
 if __name__ == "__main__":
     main()
