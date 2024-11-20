@@ -185,7 +185,7 @@ def main():
     
     # Centered title
     # Centered title with tagline
-st.markdown("""
+    st.markdown("""
     <div class="title-container">
         <h1>🚀 TRADEO</h1>
         <p style="font-size: 1.2rem; margin-top: -0.5rem; color: #FF6B6B;">stocks made simple fr 📈</p>
