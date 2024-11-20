@@ -139,70 +139,153 @@ def create_price_chart(historical_data):
 def main():
     st.set_page_config(page_title="TRADEO", layout="wide")
     
-    # Custom CSS
+    # Enhanced Custom CSS
     st.markdown("""
         <style>
+        /* Base styles */
         .stApp {
             background-color: #0e1117;
             color: #ffffff;
         }
-        .stMetric {
-            background-color: #1f2937;
-            padding: 10px;
-            border-radius: 5px;
-        }
-        .analysis-text {
-            text-align: center;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        .stButton>button {
-            height: 2.75rem;
-            margin-top: 0;
-            padding: 0.5rem 1rem;
-        }
+        
+        /* Title and tagline */
         .title-container {
             text-align: center;
-            padding: 1rem 0;
+            padding: 2rem 0;
             margin-bottom: 2rem;
+            background: linear-gradient(90deg, rgba(14,17,23,0) 0%, rgba(14,17,23,0.8) 50%, rgba(14,17,23,0) 100%);
         }
+        
+        .title-container h1 {
+            color: #fff;
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .tagline {
+            color: #FF6B6B;
+            font-size: 1.2rem;
+            margin-top: -0.5rem;
+        }
+        
+        /* Analysis sections */
+        .analysis-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .section-header {
+            color: #4FD1C5;
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin: 2rem 0 1rem 0;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #4FD1C5;
+        }
+        
+        .subsection-header {
+            color: #90CDF4;
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin: 1.5rem 0 1rem 0;
+        }
+        
+        .financial-ratio {
+            background: rgba(45, 55, 72, 0.5);
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 0.5rem 0;
+            border-left: 4px solid #4FD1C5;
+        }
+        
+        .ratio-label {
+            color: #A0AEC0;
+            font-size: 0.9rem;
+        }
+        
+        .ratio-value {
+            color: #fff;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+        
+        /* Metrics styling */
+        .stMetric {
+            background-color: rgba(45, 55, 72, 0.7);
+            padding: 1.5rem;
+            border-radius: 8px;
+            border-top: 4px solid #4FD1C5;
+        }
+        
+        /* Search container */
         .search-container {
             max-width: 1000px;
             margin: 0 auto;
             padding: 0 1rem;
         }
-        /* Fix for input field height */
+        
+        .stButton>button {
+            height: 2.75rem;
+            background-color: #4FD1C5;
+            color: #1A202C;
+            font-weight: 600;
+        }
+        
         .stTextInput input {
             height: 2.75rem;
+            background-color: rgba(45, 55, 72, 0.7);
+            border-color: #4FD1C5;
         }
-        /* Ensure columns are properly aligned */
-        .row-widget.stButton {
-            height: 2.75rem;
+        
+        /* Analysis text content */
+        .analysis-text h1 {
+            color: #4FD1C5;
+            font-size: 1.8rem;
+            margin: 2rem 0 1rem 0;
+        }
+        
+        .analysis-text h2 {
+            color: #90CDF4;
+            font-size: 1.4rem;
+            margin: 1.5rem 0 1rem 0;
+        }
+        
+        .analysis-text li {
+            margin: 0.5rem 0;
+            line-height: 1.6;
+        }
+        
+        /* Format markdown content */
+        .markdown-text-container {
+            line-height: 1.6;
+            color: #E2E8F0;
+        }
+        
+        .markdown-text-container strong {
+            color: #90CDF4;
         }
         </style>
     """, unsafe_allow_html=True)
     
-    # Centered title
- 
+    # Title and tagline
     st.markdown("""
-    <div class="title-container">
-        <h1>🚀 TRADEO</h1>
-        <p style="font-size: 1.2rem; margin-top: -0.5rem; color: #FF6B6B;">stocks made simple fr 📈</p>
-    </div>
-""", unsafe_allow_html=True)
+        <div class="title-container">
+            <h1>🚀 TRADEO</h1>
+            <p class="tagline">stocks made simple fr📈</p>
+        </div>
+    """, unsafe_allow_html=True)
     
-    # Search container with better column proportions
+    # Search container
     st.markdown('<div class="search-container">', unsafe_allow_html=True)
-    col1, col2 = st.columns([5, 1])  # Adjusted ratio for better spacing
+    col1, col2 = st.columns([5, 1])
     
     with col1:
         ticker = st.text_input("Enter Stock Ticker:", "", key="ticker_input", label_visibility="collapsed").upper()
     with col2:
         analyze_button = st.button("Analyze 📊", type="primary", use_container_width=True)
     st.markdown('</div>', unsafe_allow_html=True)
-   
-    
+
     if analyze_button or ticker:
         if ticker:
             try:
@@ -213,25 +296,27 @@ def main():
                     analysis, stock_data = analyzer.analyze_sentiment(ticker)
                     
                     if stock_data:
-                        # Display metrics
-                        st.markdown("<h2 style='text-align: center;'>📈 Key Metrics</h2>", unsafe_allow_html=True)
-                        col1, col2, col3, col4 = st.columns(4)
-                        with col1:
-                            st.metric("Current Price", f"${stock_data['current_price']:.2f}")
-                        with col2:
-                            st.metric("Target Price", f"${stock_data['target_price']:.2f}")
-                        with col3:
-                            st.metric("PE Ratio", f"{stock_data['pe_ratio']:.2f}")
-                        with col4:
-                            st.metric("1-Month Change", f"{stock_data['price_change']:.2f}%")
+                        # Display metrics in a more appealing way
+                        st.markdown('<h2 class="section-header">📈 Key Metrics</h2>', unsafe_allow_html=True)
+                        metrics_container = st.container()
+                        with metrics_container:
+                            col1, col2, col3, col4 = st.columns(4)
+                            with col1:
+                                st.metric("Current Price", f"${stock_data['current_price']:.2f}")
+                            with col2:
+                                st.metric("Target Price", f"${stock_data['target_price']:.2f}")
+                            with col3:
+                                st.metric("PE Ratio", f"{stock_data['pe_ratio']:.2f}")
+                            with col4:
+                                st.metric("1-Month Change", f"{stock_data['price_change']:.2f}%")
                         
                         # Display chart
-                        st.markdown("<h2 style='text-align: center;'>📊 Price Chart</h2>", unsafe_allow_html=True)
+                        st.markdown('<h2 class="section-header">📊 Price Chart</h2>', unsafe_allow_html=True)
                         st.plotly_chart(create_price_chart(stock_data['historical_data']), use_container_width=True)
-                    
-                    # Display analysis
-                    st.markdown("<h2 style='text-align: center;'>📝 Analysis Report</h2>", unsafe_allow_html=True)
-                    st.markdown(f"<div class='analysis-container'>{analysis}</div>", unsafe_allow_html=True)
+                        
+                        # Display analysis with enhanced formatting
+                        st.markdown('<h2 class="section-header">📝 Analysis Report</h2>', unsafe_allow_html=True)
+                        st.markdown(f'<div class="markdown-text-container">{analysis}</div>', unsafe_allow_html=True)
                     
             except Exception as e:
                 st.error(f"Error analyzing {ticker}: {str(e)}")
