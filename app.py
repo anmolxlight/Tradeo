@@ -190,7 +190,7 @@ st.markdown("""
         <h1>🚀 TRADEO</h1>
         <p style="font-size: 1.2rem; margin-top: -0.5rem; color: #FF6B6B;">stocks made simple fr 📈</p>
     </div>
-""", unsafe_allow_html=Tru
+""", unsafe_allow_html=True)
     
     # Search container with better column proportions
     st.markdown('<div class="search-container">', unsafe_allow_html=True)
