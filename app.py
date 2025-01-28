@@ -184,7 +184,6 @@ def main():
     """, unsafe_allow_html=True)
     
     # Centered title
-    # Centered title with tagline
     st.markdown("""
     <div class="title-container">
         <h1>🚀 TRADEO</h1>
@@ -197,11 +196,13 @@ def main():
     col1, col2 = st.columns([5, 1])  # Adjusted ratio for better spacing
     
     with col1:
-        ticker = st.text_input("Enter Stock Ticker:", "", key="ticker_input", label_visibility="collapsed").upper()
+        ticker = st.text_input("Enter Stock Ticker:", 
+                               placeholder="Type the stock or crypto name here", 
+                               key="ticker_input", 
+                               label_visibility="collapsed").upper()
     with col2:
         analyze_button = st.button("Analyze 📊", type="primary", use_container_width=True)
     st.markdown('</div>', unsafe_allow_html=True)
-   
     
     if analyze_button or ticker:
         if ticker:
