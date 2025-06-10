@@ -1,5 +1,6 @@
 streamlit
-openai
+google-generativeai
+tavily-python
 yfinance
 plotly
 pandas
