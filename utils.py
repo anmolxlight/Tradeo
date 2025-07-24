@@ -9,12 +9,14 @@ class DataProcessor:
         """Extract price value from text content with improved accuracy"""
         text = text.lower()
         
-        # Look for common price patterns
+        # Look for common price patterns supporting both USD and INR
         price_patterns = [
             r'(?:price|stock|trading|closed?)\s*(?:at|for|:)?\s*[\$₹]?\s*(\d{1,6}\.?\d{0,2})',
             r'[\$₹]\s*(\d{1,6}\.?\d{0,2})',
             r'(\d{1,6}\.?\d{0,2})\s*[\$₹]',
             r'(?:priced?|valued?|worth)\s*[\$₹]?\s*(\d{1,6}\.?\d{0,2})',
+            r'rs\.?\s*(\d{1,6}\.?\d{0,2})',  # Indian rupees format
+            r'inr\s*(\d{1,6}\.?\d{0,2})',    # INR format
         ]
         
         potential_prices = []
@@ -24,9 +26,15 @@ class DataProcessor:
             for match in matches:
                 try:
                     price = float(match)
-                    # Stock prices are typically between $1 and $10,000
-                    if 1.0 <= price <= 10000:
-                        potential_prices.append(price)
+                    # Adjust price range based on currency (Indian stocks can be higher in INR)
+                    if any(symbol in text for symbol in ['₹', 'rs.', 'inr']):
+                        # Indian stocks: ₹10 to ₹100,000 range
+                        if 10.0 <= price <= 100000:
+                            potential_prices.append(price)
+                    else:
+                        # US stocks: $1 to $10,000 range
+                        if 1.0 <= price <= 10000:
+                            potential_prices.append(price)
                 except ValueError:
                     continue
         
@@ -111,17 +119,12 @@ class DataProcessor:
     
     @staticmethod
     def format_currency(amount: float, currency: str = "$") -> str:
-        """Format currency amount with proper formatting"""
+        """Format currency amount showing exact prices with comma separation"""
         if amount == 0:
             return "N/A"
         
-        # Use $ as default for US stocks
-        if amount >= 1000000:  # 1 million
-            return f"{currency}{amount/1000000:.2f}M"
-        elif amount >= 1000:  # 1 thousand
-            return f"{currency}{amount/1000:.2f}K"
-        else:
-            return f"{currency}{amount:.2f}"
+        # Show exact amount with comma thousand separators for both currencies
+        return f"{currency}{amount:,.2f}"
     
     @staticmethod
     def create_news_summary(news_items: List[Dict], max_items: int = 5) -> Tuple[str, List[Dict]]:

@@ -19,18 +19,26 @@ class StockSentimentAnalyzer:
     def fetch_stock_metrics(self, ticker):
         """Dedicated function to fetch stock metrics using Perplexity API only"""
         try:
-            # Detailed query for stock metrics
+            # Determine if this is an Indian stock
+            is_indian_stock = self._is_indian_stock(ticker)
+            currency_symbol = "₹" if is_indian_stock else "$"
+            currency_name = "INR" if is_indian_stock else "USD"
+            
+            # Detailed query for stock metrics with appropriate currency
             metrics_query = f"""
             Get the exact current stock price, target price, PE ratio, and recent price change percentage for {ticker}.
             
             Please provide the information in this exact format:
-            Current Price: $X.XX
-            Target Price: $X.XX (or N/A if not available)
+            Current Price: {currency_symbol}X.XX
+            Target Price: {currency_symbol}X.XX (or N/A if not available)
             PE Ratio: X.XX (or N/A if not available)
             Price Change: +/-X.XX%
             
-            Source the data from reliable financial sources like Yahoo Finance, Bloomberg, MarketWatch, or Google Finance.
-            Be precise with the numbers and include the dollar sign for prices.
+            IMPORTANT: 
+            - If this is an Indian stock (like RELIANCE, TCS, INFY, HDFCBANK, etc.), show prices in Indian Rupees (₹)
+            - If this is a US/international stock, show prices in US Dollars ($)
+            - Source data from reliable financial sources like Yahoo Finance, Bloomberg, MarketWatch, Google Finance, or Moneycontrol for Indian stocks
+            - Be precise with the numbers and include the correct currency symbol
             """
             
             payload = {
@@ -38,7 +46,7 @@ class StockSentimentAnalyzer:
                 "messages": [
                     {
                         "role": "system",
-                        "content": "You are a precise financial data assistant. Extract exact stock metrics from reliable financial sources. Always format prices with $ symbol and percentages with % symbol. Be accurate and concise."
+                        "content": f"You are a precise financial data assistant. Extract exact stock metrics from reliable financial sources. For Indian stocks, use ₹ (INR), for US/international stocks use $ (USD). Always format percentages with % symbol. Be accurate and concise. This stock is from {'India' if is_indian_stock else 'US/International'} market."
                     },
                     {
                         "role": "user",
@@ -61,24 +69,26 @@ class StockSentimentAnalyzer:
             metrics_text = response_data['choices'][0]['message']['content']
             
             # Parse the structured response
-            return self._parse_metrics_response(metrics_text)
+            return self._parse_metrics_response(metrics_text, is_indian_stock)
             
         except Exception as e:
             st.warning(f"Error fetching stock metrics: {str(e)}")
             return self._get_empty_stock_data()
     
-    def _parse_metrics_response(self, text):
+    def _parse_metrics_response(self, text, is_indian_stock=False):
         """Parse the structured metrics response from Perplexity"""
         stock_data = self._get_empty_stock_data()
+        stock_data['is_indian'] = is_indian_stock
         
         try:
-            # Extract current price
-            current_price_match = re.search(r'Current Price:\s*\$(\d+\.?\d*)', text, re.IGNORECASE)
+            # Extract current price (support both $ and ₹)
+            currency_pattern = r'₹' if is_indian_stock else r'\$'
+            current_price_match = re.search(rf'Current Price:\s*[{currency_pattern}$₹]\s*(\d+\.?\d*)', text, re.IGNORECASE)
             if current_price_match:
                 stock_data['current_price'] = float(current_price_match.group(1))
             
             # Extract target price
-            target_price_match = re.search(r'Target Price:\s*\$(\d+\.?\d*)', text, re.IGNORECASE)
+            target_price_match = re.search(rf'Target Price:\s*[{currency_pattern}$₹]\s*(\d+\.?\d*)', text, re.IGNORECASE)
             if target_price_match:
                 stock_data['target_price'] = float(target_price_match.group(1))
             
@@ -103,8 +113,45 @@ class StockSentimentAnalyzer:
             'current_price': 0,
             'target_price': 0,
             'pe_ratio': 0,
-            'price_change': 0
+            'price_change': 0,
+            'is_indian': False
         }
+    
+    def _is_indian_stock(self, ticker):
+        """Determine if a stock ticker is from Indian market"""
+        # Common Indian stock tickers
+        indian_stocks = {
+            # Major Indian companies
+            'RELIANCE', 'TCS', 'HDFCBANK', 'INFY', 'HINDUNILVR', 'ICICIBANK', 'ITC', 
+            'SBIN', 'BHARTIARTL', 'KOTAKBANK', 'LT', 'ASIANPAINT', 'AXISBANK', 'MARUTI',
+            'BAJFINANCE', 'HCLTECH', 'WIPRO', 'ULTRACEMCO', 'DMART', 'BAJAJFINSV',
+            'TITAN', 'NESTLEIND', 'POWERGRID', 'TATAMOTORS', 'TECHM', 'SUNPHARMA',
+            'JSWSTEEL', 'TATASTEEL', 'INDUSINDBK', 'ADANIENT', 'BPCL', 'GRASIM',
+            'COALINDIA', 'ONGC', 'NTPC', 'DRREDDY', 'APOLLOHOSP', 'BAJAJ-AUTO',
+            'CIPLA', 'EICHERMOT', 'DIVISLAB', 'HEROMOTOCO', 'BRITANNIA', 'SHREECEM',
+            'PIDILITIND', 'GODREJCP', 'BERGEPAINT', 'DABUR', 'AMBUJACEM', 'BANDHANBNK',
+            'MCDOWELL-N', 'TATACONSUM', 'CHOLAFIN', 'GAIL', 'SIEMENS', 'DLF',
+            'ZEEL', 'VEDL', 'CADILAHC', 'LUPIN', 'MARICO', 'BIOCON', 'MUTHOOTFIN',
+            'PAGEIND', 'AUROPHARMA', 'TORNTPHARM', 'COLPAL', 'HDFCLIFE', 'SBILIFE',
+            'ICICIPRULI', 'BAJAJHLDNG', 'MINDTREE', 'MPHASIS', 'PERSISTENT'
+        }
+        
+        # Check if ticker matches Indian stock patterns
+        ticker_upper = ticker.upper()
+        
+        # Direct match with known Indian stocks
+        if ticker_upper in indian_stocks:
+            return True
+            
+        # Check for .NS or .BO suffixes (NSE/BSE)
+        if ticker_upper.endswith('.NS') or ticker_upper.endswith('.BO'):
+            return True
+            
+        # Check for Indian sector ETFs or mutual funds
+        if any(suffix in ticker_upper for suffix in ['.NSE', '.BSE', 'NIFTY', 'SENSEX']):
+            return True
+            
+        return False
     
     def fetch_comprehensive_analysis(self, ticker):
         """Fetch comprehensive stock analysis using Perplexity API only"""

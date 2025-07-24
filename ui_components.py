@@ -396,9 +396,13 @@ class UIComponents:
     def render_metrics(stock_data):
         """Render metrics in a minimal style"""
         if stock_data and stock_data['current_price'] > 0:
-            # Format values
-            current_price = DataProcessor.format_currency(stock_data['current_price'])
-            target_price = DataProcessor.format_currency(stock_data['target_price']) if stock_data['target_price'] > 0 else "N/A"
+            # Determine currency based on whether it's an Indian stock
+            is_indian = stock_data.get('is_indian', False)
+            currency = "₹" if is_indian else "$"
+            
+            # Format values with appropriate currency
+            current_price = DataProcessor.format_currency(stock_data['current_price'], currency)
+            target_price = DataProcessor.format_currency(stock_data['target_price'], currency) if stock_data['target_price'] > 0 else "N/A"
             pe_ratio = f"{stock_data['pe_ratio']:.2f}" if stock_data['pe_ratio'] > 0 else "N/A"
             price_change = stock_data['price_change']
             change_color = "#4ade80" if price_change >= 0 else "#f87171"
