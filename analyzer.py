@@ -62,10 +62,19 @@ class StockSentimentAnalyzer:
                 
                 response = requests.post(self.base_url, json=payload, headers=headers)
                 
+                # Check if request was successful
+                if response.status_code != 200:
+                    st.warning(f"API request failed with status {response.status_code}: {response.text}")
+                    return None, []
+                
                 # Parse the response and extract structured data
-                response_data = response.json()
-                search_result = response_data['choices'][0]['message']['content']
-                results = [{"content": search_result, "url": "perplexity_search"}]
+                try:
+                    response_data = response.json()
+                    search_result = response_data['choices'][0]['message']['content']
+                    results = [{"content": search_result, "url": "perplexity_search"}]
+                except (KeyError, IndexError) as e:
+                    st.warning(f"Unexpected API response format: {response.text[:200]}")
+                    return None, []
                 
                 # Initialize stock data structure
                 stock_data = {
@@ -160,8 +169,17 @@ class StockSentimentAnalyzer:
             }
             
             response = requests.post(self.base_url, json=payload, headers=headers)
-            response_data = response.json()
-            return response_data['choices'][0]['message']['content'], stock_data
+            
+            # Check if request was successful
+            if response.status_code != 200:
+                return f"API request failed with status {response.status_code}: {response.text}", stock_data
+            
+            # Parse the response
+            try:
+                response_data = response.json()
+                return response_data['choices'][0]['message']['content'], stock_data
+            except (KeyError, IndexError, ValueError) as e:
+                return f"Error parsing API response: {str(e)}. Response: {response.text[:200]}", stock_data
         except Exception as e:
             return f"Error analyzing sentiment: {str(e)}", stock_data
 
