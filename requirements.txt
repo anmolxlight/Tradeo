@@ -1,7 +1,7 @@
 streamlit
-google-generativeai
-tavily-python
+openai
 yfinance
 plotly
 pandas
 python-dotenv
+requests

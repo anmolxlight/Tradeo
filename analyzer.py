@@ -1,17 +1,18 @@
-import google.generativeai as genai
-from tavily import TavilyClient
+from openai import OpenAI
 import datetime
 import os
 import time
 import streamlit as st
+import requests
 from utils import DataProcessor, CacheManager
 from config import Config
 
 class StockSentimentAnalyzer:
-    def __init__(self, gemini_api_key, tavily_api_key):
-        genai.configure(api_key=gemini_api_key)
-        self.model = genai.GenerativeModel("gemini-1.5-flash")
-        self.tavily_client = TavilyClient(api_key=tavily_api_key)
+    def __init__(self, perplexity_api_key):
+        self.client = OpenAI(
+            api_key=perplexity_api_key,
+            base_url="https://api.perplexity.ai"
+        )
         self.config = Config()
         self.cache = CacheManager()
         self.data_processor = DataProcessor()
@@ -40,16 +41,26 @@ class StockSentimentAnalyzer:
                 if attempt > 0:
                     time.sleep(2 ** attempt)
                 
-                # Use optimized search query
-                search_query = self.config.get_search_query(ticker)
-                response = self.tavily_client.search(
-                    query=search_query,
-                    topic="finance",
-                    search_depth=self.config.search_depth,
-                    include_answer="advanced",
-                    max_results=self.config.max_results
+                # Use Perplexity to search for stock information
+                search_query = f"Current stock price, target price, PE ratio, and recent price change for {ticker} stock. Include recent news and financial data from reliable sources like Moneycontrol, Yahoo Finance, or financial news sites."
+                
+                response = self.client.chat.completions.create(
+                    model="llama-3.1-sonar-small-128k-online",
+                    messages=[
+                        {
+                            "role": "system",
+                            "content": "You are a financial data retrieval assistant. Extract and return structured financial data for the requested stock ticker. Return data in JSON format with current_price, target_price, pe_ratio, price_change, and news_summary fields."
+                        },
+                        {
+                            "role": "user",
+                            "content": search_query
+                        }
+                    ]
                 )
-                results = response.get('results', [])
+                
+                # Parse the response and extract structured data
+                search_result = response.choices[0].message.content
+                results = [{"content": search_result, "url": "perplexity_search"}]
                 
                 # Initialize stock data structure
                 stock_data = {
@@ -125,11 +136,20 @@ class StockSentimentAnalyzer:
             prompt = self._create_fallback_prompt(ticker, current_date, news_summary)
         
         try:
-            response = self.model.generate_content(
-                contents=prompt,
-                generation_config={"system_instruction": self._get_system_instruction()}
+            response = self.client.chat.completions.create(
+                model="llama-3.1-sonar-large-128k-online",
+                messages=[
+                    {
+                        "role": "system",
+                        "content": self._get_system_instruction()
+                    },
+                    {
+                        "role": "user",
+                        "content": prompt
+                    }
+                ]
             )
-            return response.text, stock_data
+            return response.choices[0].message.content, stock_data
         except Exception as e:
             return f"Error analyzing sentiment: {str(e)}", stock_data
 

@@ -33,7 +33,7 @@ def main():
         
         try:
             # Initialize analyzer
-            analyzer = StockSentimentAnalyzer(config.gemini_api_key, config.tavily_api_key)
+            analyzer = StockSentimentAnalyzer(config.perplexity_api_key)
             
             # Show loading spinner and perform analysis
             with UIComponents.render_loading_spinner("Analyzing..."):

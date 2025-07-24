@@ -6,8 +6,7 @@ class Config:
     
     def __init__(self):
         load_dotenv()
-        self.gemini_api_key = os.getenv("GEMINI_API_KEY")
-        self.tavily_api_key = os.getenv("TAVILY_API_KEY")
+        self.perplexity_api_key = os.getenv("PERPLEXITY_API_KEY")
         
         # App settings
         self.app_title = "TRADEO"
@@ -36,10 +35,8 @@ class Config:
         """Validate that required API keys are present"""
         missing_keys = []
         
-        if not self.gemini_api_key:
-            missing_keys.append("GEMINI_API_KEY")
-        if not self.tavily_api_key:
-            missing_keys.append("TAVILY_API_KEY")
+        if not self.perplexity_api_key:
+            missing_keys.append("PERPLEXITY_API_KEY")
             
         return len(missing_keys) == 0, missing_keys
     
