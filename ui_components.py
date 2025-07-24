@@ -89,10 +89,10 @@ class UIComponents:
                 width: 100%;
             }
             
-            /* Search container - closer to title */
+            /* Search container - smaller and more compact */
             .search-wrapper {
                 width: 100%;
-                max-width: 650px;
+                max-width: 500px;
                 position: relative;
                 margin-bottom: 2rem;
                 display: flex;
@@ -116,14 +116,14 @@ class UIComponents:
             .stTextInput > div > div > input {
                 background: linear-gradient(135deg, #141414 0%, #1a1a1a 100%) !important;
                 border: 1px solid #2a2a2a !important;
-                border-radius: 16px !important;
-                padding: 1.3rem 2rem !important;
-                font-size: 1.1rem !important;
+                border-radius: 12px !important;
+                padding: 1rem 1.5rem !important;
+                font-size: 1rem !important;
                 color: #ffffff !important;
-                height: 64px !important;
+                height: 48px !important;
                 font-family: 'Inter', sans-serif !important;
                 transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
-                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4) !important;
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3) !important;
                 width: 100% !important;
                 text-align: center !important;
                 font-weight: 400 !important;
@@ -432,56 +432,55 @@ class UIComponents:
     @staticmethod
     def render_analysis(analysis):
         """Render analysis with beautiful formatting"""
-        # Apply custom CSS for the next markdown element
+        # Apply custom CSS for beautiful content without boxes
         st.markdown("""
         <style>
-        .element-container:has(.analysis-markdown) {
-            background: linear-gradient(135deg, #141414 0%, #1a1a1a 100%) !important;
-            border: 1px solid #2a2a2a !important;
-            border-radius: 16px !important;
-            padding: 3rem !important;
-            margin: 2rem auto !important;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
-            backdrop-filter: blur(10px) !important;
-            max-width: 900px !important;
-            overflow-x: hidden !important;
-            word-wrap: break-word !important;
-        }
-        .analysis-markdown h2 {
-            color: #ffffff !important;
-            margin-top: 2.5rem !important;
-            margin-bottom: 1.2rem !important;
-            font-weight: 600 !important;
-            font-size: 1.4rem !important;
-            border-bottom: 2px solid #333333 !important;
-            padding-bottom: 0.5rem !important;
-        }
-        .analysis-markdown h2:first-child {
-            margin-top: 0 !important;
-        }
-        .analysis-markdown p, .analysis-markdown li {
+        .analysis-content {
             color: #cccccc !important;
-            margin-bottom: 0.8rem !important;
+            line-height: 1.8 !important;
+            max-width: 900px !important;
+            margin: 0 auto !important;
+            padding: 2rem 1rem !important;
+            word-wrap: break-word !important;
+            overflow-wrap: break-word !important;
+        }
+        .analysis-content h2 {
+            color: #ffffff !important;
+            margin-top: 3rem !important;
+            margin-bottom: 1.5rem !important;
+            font-weight: 600 !important;
+            font-size: 1.5rem !important;
+            border-bottom: 2px solid #333333 !important;
+            padding-bottom: 0.8rem !important;
+        }
+        .analysis-content h2:first-child {
+            margin-top: 1rem !important;
+        }
+        .analysis-content p, .analysis-content li {
+            color: #cccccc !important;
+            margin-bottom: 1rem !important;
             font-size: 1rem !important;
             line-height: 1.8 !important;
             word-wrap: break-word !important;
             overflow-wrap: break-word !important;
             hyphens: auto !important;
-            max-width: 100% !important;
         }
-        .analysis-markdown strong {
+        .analysis-content strong {
             color: #ffffff !important;
             font-weight: 600 !important;
         }
-        .analysis-markdown ul, .analysis-markdown ol {
-            margin-left: 1.5rem !important;
-            margin-bottom: 1rem !important;
+        .analysis-content ul, .analysis-content ol {
+            margin-left: 2rem !important;
+            margin-bottom: 1.5rem !important;
+        }
+        .analysis-content li {
+            margin-bottom: 0.8rem !important;
         }
         </style>
         """, unsafe_allow_html=True)
         
-        # Render the markdown with a custom class and proper word wrapping
-        st.markdown(f'<div class="analysis-markdown" style="word-wrap: break-word; overflow-wrap: break-word; max-width: 100%; overflow-x: hidden;">\n\n{analysis}\n\n</div>', unsafe_allow_html=True)
+        # Render the content without box styling
+        st.markdown(f'<div class="analysis-content">\n\n{analysis}\n\n</div>', unsafe_allow_html=True)
 
     @staticmethod
     def render_error(ticker, error_message):

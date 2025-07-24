@@ -28,7 +28,7 @@ class Config:
         self.max_results = 10
         
         # Supported currencies and formats
-        self.currency_symbols = ['rs.', '₹', 'inr', '$', 'usd']
+        self.currency_symbols = ['$', 'usd', 'dollar', '₹', 'rs.', 'inr']
         self.search_sites = [
             "site:moneycontrol.com",
             "site:finance.yahoo.com", 

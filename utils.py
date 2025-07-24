@@ -6,20 +6,36 @@ class DataProcessor:
     
     @staticmethod
     def extract_price_from_text(text: str, currency_symbols: List[str]) -> Optional[float]:
-        """Extract price value from text content"""
+        """Extract price value from text content with improved accuracy"""
         text = text.lower()
-        for line in text.split('\n'):
-            if any(symbol in line for symbol in currency_symbols):
-                # Extract numbers with decimal points
-                numbers = re.findall(r'\d+\.?\d*', line)
-                for num_str in numbers:
-                    try:
-                        price = float(num_str)
-                        # Filter out unrealistic values
-                        if 0.01 <= price <= 1000000:
-                            return price
-                    except ValueError:
-                        continue
+        
+        # Look for common price patterns
+        price_patterns = [
+            r'(?:price|stock|trading|closed?)\s*(?:at|for|:)?\s*[\$₹]?\s*(\d{1,6}\.?\d{0,2})',
+            r'[\$₹]\s*(\d{1,6}\.?\d{0,2})',
+            r'(\d{1,6}\.?\d{0,2})\s*[\$₹]',
+            r'(?:priced?|valued?|worth)\s*[\$₹]?\s*(\d{1,6}\.?\d{0,2})',
+        ]
+        
+        potential_prices = []
+        
+        for pattern in price_patterns:
+            matches = re.findall(pattern, text, re.IGNORECASE)
+            for match in matches:
+                try:
+                    price = float(match)
+                    # Stock prices are typically between $1 and $10,000
+                    if 1.0 <= price <= 10000:
+                        potential_prices.append(price)
+                except ValueError:
+                    continue
+        
+        # Return the most reasonable price (typically the highest credible price)
+        if potential_prices:
+            # For stocks, usually the actual price is higher than small decimals
+            potential_prices = sorted(set(potential_prices), reverse=True)
+            return potential_prices[0]
+        
         return None
     
     @staticmethod
@@ -94,15 +110,14 @@ class DataProcessor:
         return True, ticker
     
     @staticmethod
-    def format_currency(amount: float, currency: str = "₹") -> str:
+    def format_currency(amount: float, currency: str = "$") -> str:
         """Format currency amount with proper formatting"""
         if amount == 0:
             return "N/A"
         
-        if amount >= 10000000:  # 1 crore
-            return f"{currency}{amount/10000000:.2f}Cr"
-        elif amount >= 100000:  # 1 lakh
-            return f"{currency}{amount/100000:.2f}L"
+        # Use $ as default for US stocks
+        if amount >= 1000000:  # 1 million
+            return f"{currency}{amount/1000000:.2f}M"
         elif amount >= 1000:  # 1 thousand
             return f"{currency}{amount/1000:.2f}K"
         else:

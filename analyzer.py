@@ -2,6 +2,7 @@
 import datetime
 import os
 import time
+import re
 import streamlit as st
 import requests
 from utils import DataProcessor, CacheManager
@@ -15,8 +16,143 @@ class StockSentimentAnalyzer:
         self.cache = CacheManager()
         self.data_processor = DataProcessor()
     
+    def fetch_stock_metrics(self, ticker):
+        """Dedicated function to fetch stock metrics using Perplexity API only"""
+        try:
+            # Detailed query for stock metrics
+            metrics_query = f"""
+            Get the exact current stock price, target price, PE ratio, and recent price change percentage for {ticker}.
+            
+            Please provide the information in this exact format:
+            Current Price: $X.XX
+            Target Price: $X.XX (or N/A if not available)
+            PE Ratio: X.XX (or N/A if not available)
+            Price Change: +/-X.XX%
+            
+            Source the data from reliable financial sources like Yahoo Finance, Bloomberg, MarketWatch, or Google Finance.
+            Be precise with the numbers and include the dollar sign for prices.
+            """
+            
+            payload = {
+                "model": "sonar",
+                "messages": [
+                    {
+                        "role": "system",
+                        "content": "You are a precise financial data assistant. Extract exact stock metrics from reliable financial sources. Always format prices with $ symbol and percentages with % symbol. Be accurate and concise."
+                    },
+                    {
+                        "role": "user",
+                        "content": metrics_query
+                    }
+                ]
+            }
+            headers = {
+                "Authorization": f"Bearer {self.api_key}",
+                "Content-Type": "application/json"
+            }
+            
+            response = requests.post(self.base_url, json=payload, headers=headers)
+            
+            if response.status_code != 200:
+                st.warning(f"Failed to fetch stock metrics: {response.status_code}")
+                return self._get_empty_stock_data()
+            
+            response_data = response.json()
+            metrics_text = response_data['choices'][0]['message']['content']
+            
+            # Parse the structured response
+            return self._parse_metrics_response(metrics_text)
+            
+        except Exception as e:
+            st.warning(f"Error fetching stock metrics: {str(e)}")
+            return self._get_empty_stock_data()
+    
+    def _parse_metrics_response(self, text):
+        """Parse the structured metrics response from Perplexity"""
+        stock_data = self._get_empty_stock_data()
+        
+        try:
+            # Extract current price
+            current_price_match = re.search(r'Current Price:\s*\$(\d+\.?\d*)', text, re.IGNORECASE)
+            if current_price_match:
+                stock_data['current_price'] = float(current_price_match.group(1))
+            
+            # Extract target price
+            target_price_match = re.search(r'Target Price:\s*\$(\d+\.?\d*)', text, re.IGNORECASE)
+            if target_price_match:
+                stock_data['target_price'] = float(target_price_match.group(1))
+            
+            # Extract PE ratio
+            pe_ratio_match = re.search(r'PE Ratio:\s*(\d+\.?\d*)', text, re.IGNORECASE)
+            if pe_ratio_match:
+                stock_data['pe_ratio'] = float(pe_ratio_match.group(1))
+            
+            # Extract price change
+            change_match = re.search(r'Price Change:\s*([+-]?\d+\.?\d*)%', text, re.IGNORECASE)
+            if change_match:
+                stock_data['price_change'] = float(change_match.group(1))
+                
+        except Exception as e:
+            st.warning(f"Error parsing metrics: {str(e)}")
+        
+        return stock_data
+    
+    def _get_empty_stock_data(self):
+        """Return empty stock data structure"""
+        return {
+            'current_price': 0,
+            'target_price': 0,
+            'pe_ratio': 0,
+            'price_change': 0
+        }
+    
+    def fetch_comprehensive_analysis(self, ticker):
+        """Fetch comprehensive stock analysis using Perplexity API only"""
+        try:
+            analysis_query = f"""
+            Provide a comprehensive stock analysis for {ticker} including:
+            
+            1. Recent news and developments (last 7 days)
+            2. Earnings and financial performance
+            3. Technical analysis and price trends
+            4. Risk factors and market sentiment
+            5. Investment recommendation with reasoning
+            
+            Include specific data points, percentages, and cite reliable financial sources.
+            Format your response with clear headers and bullet points for readability.
+            """
+            
+            payload = {
+                "model": "sonar",
+                "messages": [
+                    {
+                        "role": "system",
+                        "content": self._get_enhanced_system_instruction()
+                    },
+                    {
+                        "role": "user",
+                        "content": analysis_query
+                    }
+                ]
+            }
+            headers = {
+                "Authorization": f"Bearer {self.api_key}",
+                "Content-Type": "application/json"
+            }
+            
+            response = requests.post(self.base_url, json=payload, headers=headers)
+            
+            if response.status_code != 200:
+                return f"Error fetching analysis: API request failed with status {response.status_code}"
+            
+            response_data = response.json()
+            return response_data['choices'][0]['message']['content']
+            
+        except Exception as e:
+            return f"Error fetching comprehensive analysis: {str(e)}"
+    
     def get_stock_data(self, ticker, max_retries=None):
-        """Get stock data with improved extraction and caching"""
+        """Get stock data using Perplexity API only - improved version"""
         if max_retries is None:
             max_retries = self.config.max_retries
         
@@ -34,72 +170,17 @@ class StockSentimentAnalyzer:
         
         ticker = result  # Use cleaned ticker
         
-        for attempt in range(max_retries):
-            try:
-                if attempt > 0:
-                    time.sleep(2 ** attempt)
-                
-                # Use Perplexity to search for stock information
-                search_query = f"Current stock price, target price, PE ratio, and recent price change for {ticker} stock. Include recent news and financial data from reliable sources like Moneycontrol, Yahoo Finance, or financial news sites."
-                
-                payload = {
-                    "model": "sonar",
-                    "messages": [
-                        {
-                            "role": "system",
-                            "content": "You are a financial data retrieval assistant. Extract and return structured financial data for the requested stock ticker. Return data in JSON format with current_price, target_price, pe_ratio, price_change, and news_summary fields."
-                        },
-                        {
-                            "role": "user",
-                            "content": search_query
-                        }
-                    ]
-                }
-                headers = {
-                    "Authorization": f"Bearer {self.api_key}",
-                    "Content-Type": "application/json"
-                }
-                
-                response = requests.post(self.base_url, json=payload, headers=headers)
-                
-                # Check if request was successful
-                if response.status_code != 200:
-                    st.warning(f"API request failed with status {response.status_code}: {response.text}")
-                    return None, []
-                
-                # Parse the response and extract structured data
-                try:
-                    response_data = response.json()
-                    search_result = response_data['choices'][0]['message']['content']
-                    results = [{"content": search_result, "url": "perplexity_search"}]
-                except (KeyError, IndexError) as e:
-                    st.warning(f"Unexpected API response format: {response.text[:200]}")
-                    return None, []
-                
-                # Initialize stock data structure
-                stock_data = {
-                    'current_price': 0,
-                    'target_price': 0,
-                    'pe_ratio': 0,
-                    'price_change': 0
-                }
-                
-                # Extract data using improved methods
-                stock_data = self._extract_stock_metrics(results, stock_data)
-                
-                # Cache the results
-                result_tuple = (stock_data, results)
-                self.cache.set(cache_key, result_tuple)
-                
-                return result_tuple
-                
-            except Exception as e:
-                if attempt < max_retries - 1:
-                    continue
-                st.warning(f"Could not fetch stock data for {ticker}: {str(e)}. Using news data only.")
-                return None, []
+        # Use the dedicated function to fetch stock metrics
+        stock_data = self.fetch_stock_metrics(ticker)
         
-        return None, []
+        # Create a simple result structure for compatibility
+        results = [{"content": f"Stock data for {ticker}", "url": "perplexity_api"}]
+        
+        # Cache the results
+        result_tuple = (stock_data, results)
+        self.cache.set(cache_key, result_tuple)
+        
+        return result_tuple
     
     def _extract_stock_metrics(self, results, stock_data):
         """Extract stock metrics using improved data processing"""
@@ -133,55 +214,16 @@ class StockSentimentAnalyzer:
         return stock_data
 
     def analyze_sentiment(self, ticker):
-        """Analyze sentiment with improved data processing"""
+        """Comprehensive sentiment analysis using Perplexity API only"""
         current_date = datetime.datetime.now().strftime("%Y-%m-%d")
-        stock_data, news = self.get_stock_data(ticker)
         
-        # Create news summary using utility function
-        news_summary, references = self.data_processor.create_news_summary(news)
+        # Get stock metrics using dedicated function
+        stock_data, _ = self.get_stock_data(ticker)
         
-        if stock_data and stock_data['current_price'] > 0:
-            price_potential = 0
-            if stock_data['target_price'] > 0:
-                price_potential = ((stock_data['target_price'] - stock_data['current_price']) / stock_data['current_price']) * 100
-            
-            prompt = self._create_detailed_prompt(ticker, current_date, stock_data, news_summary, price_potential)
-        else:
-            prompt = self._create_fallback_prompt(ticker, current_date, news_summary)
+        # Get comprehensive analysis
+        analysis = self.fetch_comprehensive_analysis(ticker)
         
-        try:
-            payload = {
-                "model": "sonar",
-                "messages": [
-                    {
-                        "role": "system",
-                        "content": self._get_system_instruction()
-                    },
-                    {
-                        "role": "user",
-                        "content": prompt
-                    }
-                ]
-            }
-            headers = {
-                "Authorization": f"Bearer {self.api_key}",
-                "Content-Type": "application/json"
-            }
-            
-            response = requests.post(self.base_url, json=payload, headers=headers)
-            
-            # Check if request was successful
-            if response.status_code != 200:
-                return f"API request failed with status {response.status_code}: {response.text}", stock_data
-            
-            # Parse the response
-            try:
-                response_data = response.json()
-                return response_data['choices'][0]['message']['content'], stock_data
-            except (KeyError, IndexError, ValueError) as e:
-                return f"Error parsing API response: {str(e)}. Response: {response.text[:200]}", stock_data
-        except Exception as e:
-            return f"Error analyzing sentiment: {str(e)}", stock_data
+        return analysis, stock_data
 
     def _create_detailed_prompt(self, ticker, current_date, stock_data, news_summary, price_potential):
         """Create detailed analysis prompt with formatted data"""
@@ -276,84 +318,68 @@ class StockSentimentAnalyzer:
         Use citations like [¹], [²], [³] for references and ensure all key points are **bold** for easy scanning.
         """
 
-    def _get_system_instruction(self):
-        """Get comprehensive system instruction for the AI model"""
+    def _get_enhanced_system_instruction(self):
+        """Get enhanced system instruction for comprehensive analysis"""
         return """
-        You are an expert stock market analyst tasked with providing a detailed investment analysis based on real-time data scraped from financial websites (e.g., Moneycontrol, Yahoo Finance, X) by Tavily Search API. Your role is to analyze the provided data, including stock price, financial metrics, and recent news, and generate a concise, professional, and actionable investment analysis. Follow these guidelines:
+        You are an expert financial analyst specializing in comprehensive stock analysis. Your task is to provide detailed, accurate, and actionable investment analysis using real-time financial data.
 
-        1. **Data Processing**:
-           - Extract current stock price, target price, PE ratio, and recent price change (e.g., 1-month or available period) from the provided Tavily search results.
-           - If specific metrics are missing, infer reasonable estimates from context or note their absence.
-           - Summarize news items, prioritizing relevance to financial performance, contracts, earnings, or industry trends.
+        **Your Capabilities:**
+        - Access to real-time stock data from major financial sources
+        - Deep analysis of market trends, news, and financial metrics
+        - Professional investment recommendations with clear reasoning
 
-        2. **Output Structure**:
-           - Format the response in markdown with clear headers and bullet points.
-           - Include reference links for each point, citing the Tavily result number (e.g., [Ref: 1]) from the provided news summary.
-           - Ensure the analysis is concise, professional, and avoids speculative claims.
+        **Analysis Requirements:**
 
-        3. **Analysis Format**:
-           **1. Current Market Sentiment Analysis**
-           - Sentiment: (Bullish/Bearish/Neutral)
-           - Investor Confidence: (High/Medium/Low)
-           - Explanation: [Provide reasoning based on price trends and news, with references, e.g., [Ref: 1]]
+        1. **Data Accuracy**: Always use precise, up-to-date financial data from reliable sources like Yahoo Finance, Bloomberg, MarketWatch, or Google Finance.
 
-           **2. Key Recent Developments and News**
-           - Recent earnings or financial results: [Ref: #]
-           - Major announcements or developments: [Ref: #]
-           - Industry trends affecting the stock: [Ref: #]
+        2. **Structure Your Response Using These Headers:**
 
-           **3. Technical Analysis**
-           - Price Trend Analysis: [Ref: #]
-           - Support and Resistance Levels: [Ref: #]
-           - Key Technical Indicators: [Ref: #]
+        ## 📊 Market Sentiment Analysis
+        **Sentiment:** [Bullish/Bearish/Neutral]  
+        **Investor Confidence:** [High/Medium/Low]  
+        **Key Insight:** [Brief explanation with data points]
 
-           **4. Risk Assessment**
-           - Market Risks: [Ref: #]
-           - Company-Specific Risks: [Ref: #]
-           - Industry Risks: [Ref: #]
+        ## 📈 Recent Developments  
+        - **Earnings & Financial Results:** [Latest earnings with specific numbers]
+        - **Major Announcements:** [Recent company news and developments]  
+        - **Industry Trends:** [Sector-specific trends affecting the stock]
 
-           **5. Investment Recommendation**
-           - Rating: (BUY/SELL/HOLD)
-           - Confidence Level: (High/Medium/Low)
-           - Entry Price Range: (within 5% of current price)
-           - Stop Loss: (specify price)
-           - Target Price: (specify price)
-           - Investment Timeframe: (Short/Medium/Long-term)
+        ## 🔍 Technical Analysis
+        - **Price Trend:** [Current technical indicators and chart patterns]
+        - **Support/Resistance:** [Key price levels with specific values]
+        - **Volume Analysis:** [Trading volume trends and significance]
 
-           **6. Key Reasons for Recommendation**
-           - [Reason with reference, e.g., [Ref: 1]]
-           - [Reason with reference, e.g., [Ref: 2]]
-           - [Reason with reference, e.g., [Ref: 3]]
+        ## ⚠️ Risk Assessment
+        **Market Risks:** [Broad market factors affecting the stock]  
+        **Company Risks:** [Company-specific risks and challenges]  
+        **Industry Risks:** [Sector-wide risks and regulatory concerns]
 
-        4. **Fallback for Limited Data**:
-           - If price or financial metrics are unavailable, provide a news-based analysis with the following format:
-             **1. Current Market Sentiment Analysis**
-             - Sentiment: (Bullish/Bearish/Neutral)
-             - Investor Confidence: (High/Medium/Low)
-             - Explanation: [Ref: #]
+        ## 🎯 Investment Recommendation
+        **🏷️ Rating:** **[BUY/SELL/HOLD]**  
+        **📊 Confidence:** [High/Medium/Low]  
+        **💰 Entry Range:** [Specific price range]  
+        **🛑 Stop Loss:** [Specific price with reasoning]  
+        **🎯 Target Price:** [12-month target with basis]  
+        **⏰ Timeframe:** [Short/Medium/Long-term investment horizon]
 
-             **2. Key Recent Developments and News**
-             - Major recent developments: [Ref: #]
-             - Industry trends: [Ref: #]
-             - Market factors: [Ref: #]
+        ## 💡 Key Investment Thesis
+        1. **[Primary reason with specific data/metrics]**
+        2. **[Secondary reason with supporting evidence]** 
+        3. **[Third reason with quantitative backing]**
 
-             **3. General Investment Considerations**
-             - Key factors to consider: [Ref: #]
-             - Market conditions: [Ref: #]
-             - Risk factors: [Ref: #]
+        **Formatting Guidelines:**
+        - Use emojis for headers as shown above
+        - Make key metrics and ratings **bold**
+        - Include specific numbers, percentages, and price targets
+        - Cite recent data points (within last 30 days when possible)
+        - Use professional, objective language
+        - Avoid speculation - base recommendations on concrete data
 
-             **4. Recommendation**
-             - General outlook: (Positive/Negative/Neutral)
-             - Key considerations: [Ref: #]
-             - Suggested approach: [Ref: #]
-             - Note: Analysis based on limited data. Verify current market prices before investing.
+        **Quality Standards:**
+        - Ensure all price targets and metrics are realistic and data-driven
+        - Include specific timeframes for predictions
+        - Reference recent financial reports, earnings calls, or major news
+        - Provide actionable insights suitable for investment decisions
 
-        5. **Error Handling**:
-           - If no relevant data is available, return a brief explanation of the issue and suggest verifying the ticker or trying again later.
-           - Avoid fabricating data or metrics not explicitly provided.
-
-        6. **Tone and Style**:
-           - Maintain a professional, objective tone.
-           - Use precise numbers where available and cite sources accurately.
-           - Warn users to verify data independently before making investment decisions.
+        Remember: Investors rely on your analysis for financial decisions. Be accurate, thorough, and professional.
         """ 
