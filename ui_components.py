@@ -125,7 +125,7 @@ class UIComponents:
                 transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
                 box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4) !important;
                 width: 100% !important;
-                text-align: left !important;
+                text-align: center !important;
                 font-weight: 400 !important;
                 backdrop-filter: blur(10px) !important;
                 text-indent: 0 !important;
@@ -135,7 +135,7 @@ class UIComponents:
             .stTextInput > div > div > input::placeholder {
                 color: #6a6a6a !important;
                 font-family: 'Inter', sans-serif !important;
-                text-align: left !important;
+                text-align: center !important;
                 font-weight: 400 !important;
                 padding-left: 0 !important;
             }
@@ -144,7 +144,7 @@ class UIComponents:
                 border-color: #505050 !important;
                 box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 0 0 2px rgba(80, 80, 80, 0.3) !important;
                 outline: none !important;
-                text-align: left !important;
+                text-align: center !important;
                 background: linear-gradient(135deg, #161616 0%, #1e1e1e 100%) !important;
                 transform: translateY(-2px) !important;
             }
@@ -435,16 +435,18 @@ class UIComponents:
         # Apply custom CSS for the next markdown element
         st.markdown("""
         <style>
-        .element-container:has(.analysis-markdown) {
-            background: linear-gradient(135deg, #141414 0%, #1a1a1a 100%) !important;
-            border: 1px solid #2a2a2a !important;
-            border-radius: 16px !important;
-            padding: 3rem !important;
-            margin: 2rem auto !important;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
-            backdrop-filter: blur(10px) !important;
-            max-width: 900px !important;
-        }
+                 .element-container:has(.analysis-markdown) {
+             background: linear-gradient(135deg, #141414 0%, #1a1a1a 100%) !important;
+             border: 1px solid #2a2a2a !important;
+             border-radius: 16px !important;
+             padding: 3rem !important;
+             margin: 2rem auto !important;
+             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
+             backdrop-filter: blur(10px) !important;
+             max-width: 900px !important;
+             overflow-x: hidden !important;
+             word-wrap: break-word !important;
+         }
         .analysis-markdown h2 {
             color: #ffffff !important;
             margin-top: 2.5rem !important;
@@ -457,12 +459,16 @@ class UIComponents:
         .analysis-markdown h2:first-child {
             margin-top: 0 !important;
         }
-        .analysis-markdown p, .analysis-markdown li {
-            color: #cccccc !important;
-            margin-bottom: 0.8rem !important;
-            font-size: 1rem !important;
-            line-height: 1.8 !important;
-        }
+                    .analysis-markdown p, .analysis-markdown li {
+             color: #cccccc !important;
+             margin-bottom: 0.8rem !important;
+             font-size: 1rem !important;
+             line-height: 1.8 !important;
+             word-wrap: break-word !important;
+             overflow-wrap: break-word !important;
+             hyphens: auto !important;
+             max-width: 100% !important;
+         }
         .analysis-markdown strong {
             color: #ffffff !important;
             font-weight: 600 !important;
@@ -472,10 +478,10 @@ class UIComponents:
             margin-bottom: 1rem !important;
         }
         </style>
-        """, unsafe_allow_html=True)
-        
-        # Render the markdown with a custom class
-        st.markdown(f'<div class="analysis-markdown">\n\n{analysis}\n\n</div>', unsafe_allow_html=True)
+                 """, unsafe_allow_html=True)
+         
+         # Render the markdown with a custom class and proper word wrapping
+         st.markdown(f'<div class="analysis-markdown" style="word-wrap: break-word; overflow-wrap: break-word; max-width: 100%; overflow-x: hidden;">\n\n{analysis}\n\n</div>', unsafe_allow_html=True)
 
     @staticmethod
     def render_error(ticker, error_message):
