@@ -1,4 +1,5 @@
 import os
+import streamlit as st
 from dotenv import load_dotenv
 
 class Config:
@@ -6,7 +7,11 @@ class Config:
     
     def __init__(self):
         load_dotenv()
-        self.perplexity_api_key = os.getenv("PERPLEXITY_API_KEY")
+        # Try Streamlit secrets first, then fall back to environment variables
+        try:
+            self.perplexity_api_key = st.secrets["PERPLEXITY_API_KEY"]
+        except (KeyError, FileNotFoundError):
+            self.perplexity_api_key = os.getenv("PERPLEXITY_API_KEY")
         
         # App settings
         self.app_title = "TRADEO"
