@@ -41,13 +41,13 @@ class UIComponents:
             
             /* Center everything on the page */
             .block-container {
-                padding-top: 0 !important;
+                padding-top: 1rem !important;
                 padding-bottom: 2rem !important;
                 max-width: 100% !important;
                 display: flex !important;
                 flex-direction: column !important;
                 align-items: center !important;
-                justify-content: center !important;
+                justify-content: flex-start !important;
                 min-height: 100vh !important;
             }
             
@@ -128,6 +128,8 @@ class UIComponents:
                 text-align: left !important;
                 font-weight: 400 !important;
                 backdrop-filter: blur(10px) !important;
+                text-indent: 0 !important;
+                box-sizing: border-box !important;
             }
             
             .stTextInput > div > div > input::placeholder {
@@ -135,6 +137,7 @@ class UIComponents:
                 font-family: 'Inter', sans-serif !important;
                 text-align: left !important;
                 font-weight: 400 !important;
+                padding-left: 0 !important;
             }
             
             .stTextInput > div > div > input:focus {
@@ -241,6 +244,8 @@ class UIComponents:
                 text-align: left;
                 box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
                 backdrop-filter: blur(10px);
+                overflow-y: visible;
+                max-height: none;
             }
             
             .analysis-content h2 {
@@ -335,8 +340,15 @@ class UIComponents:
                 display: flex;
                 flex-direction: column;
                 align-items: center;
-                justify-content: center;
+                justify-content: flex-start;
                 min-height: 100vh;
+                padding-top: 2rem;
+            }
+            
+            /* Fix scrolling */
+            .main {
+                overflow-y: auto !important;
+                height: auto !important;
             }
             </style>
         """, unsafe_allow_html=True)
@@ -357,7 +369,7 @@ class UIComponents:
         st.markdown('<div class="search-wrapper">', unsafe_allow_html=True)
         
         ticker = st.text_input(
-            "", 
+            "Stock Ticker", 
             placeholder="Enter any stock ticker (e.g., AAPL, TSLA, NVDA)...", 
             key="ticker_input",
             label_visibility="collapsed"
@@ -420,9 +432,50 @@ class UIComponents:
     @staticmethod
     def render_analysis(analysis):
         """Render analysis with beautiful formatting"""
-        # Convert markdown to HTML for better styling
-        formatted_analysis = analysis.replace('\n', '<br>')
-        st.markdown(f'<div class="analysis-content">{formatted_analysis}</div>', unsafe_allow_html=True)
+        # Apply custom CSS for the next markdown element
+        st.markdown("""
+        <style>
+        .element-container:has(.analysis-markdown) {
+            background: linear-gradient(135deg, #141414 0%, #1a1a1a 100%) !important;
+            border: 1px solid #2a2a2a !important;
+            border-radius: 16px !important;
+            padding: 3rem !important;
+            margin: 2rem auto !important;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
+            backdrop-filter: blur(10px) !important;
+            max-width: 900px !important;
+        }
+        .analysis-markdown h2 {
+            color: #ffffff !important;
+            margin-top: 2.5rem !important;
+            margin-bottom: 1.2rem !important;
+            font-weight: 600 !important;
+            font-size: 1.4rem !important;
+            border-bottom: 2px solid #333333 !important;
+            padding-bottom: 0.5rem !important;
+        }
+        .analysis-markdown h2:first-child {
+            margin-top: 0 !important;
+        }
+        .analysis-markdown p, .analysis-markdown li {
+            color: #cccccc !important;
+            margin-bottom: 0.8rem !important;
+            font-size: 1rem !important;
+            line-height: 1.8 !important;
+        }
+        .analysis-markdown strong {
+            color: #ffffff !important;
+            font-weight: 600 !important;
+        }
+        .analysis-markdown ul, .analysis-markdown ol {
+            margin-left: 1.5rem !important;
+            margin-bottom: 1rem !important;
+        }
+        </style>
+        """, unsafe_allow_html=True)
+        
+        # Render the markdown with a custom class
+        st.markdown(f'<div class="analysis-markdown">\n\n{analysis}\n\n</div>', unsafe_allow_html=True)
 
     @staticmethod
     def render_error(ticker, error_message):

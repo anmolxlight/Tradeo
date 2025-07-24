@@ -10,7 +10,7 @@ def main():
     # Set page configuration
     st.set_page_config(
         page_title="tradeo",
-        layout="centered",
+        layout="wide",
         initial_sidebar_state="collapsed"
     )
     
