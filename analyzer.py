@@ -1,4 +1,4 @@
-from openai import OpenAI
+
 import datetime
 import os
 import time
@@ -9,10 +9,8 @@ from config import Config
 
 class StockSentimentAnalyzer:
     def __init__(self, perplexity_api_key):
-        self.client = OpenAI(
-            api_key=perplexity_api_key,
-            base_url="https://api.perplexity.ai"
-        )
+        self.api_key = perplexity_api_key
+        self.base_url = "https://api.perplexity.ai/chat/completions"
         self.config = Config()
         self.cache = CacheManager()
         self.data_processor = DataProcessor()
@@ -44,9 +42,9 @@ class StockSentimentAnalyzer:
                 # Use Perplexity to search for stock information
                 search_query = f"Current stock price, target price, PE ratio, and recent price change for {ticker} stock. Include recent news and financial data from reliable sources like Moneycontrol, Yahoo Finance, or financial news sites."
                 
-                response = self.client.chat.completions.create(
-                    model="llama-3.1-sonar-small-128k-online",
-                    messages=[
+                payload = {
+                    "model": "sonar",
+                    "messages": [
                         {
                             "role": "system",
                             "content": "You are a financial data retrieval assistant. Extract and return structured financial data for the requested stock ticker. Return data in JSON format with current_price, target_price, pe_ratio, price_change, and news_summary fields."
@@ -56,10 +54,17 @@ class StockSentimentAnalyzer:
                             "content": search_query
                         }
                     ]
-                )
+                }
+                headers = {
+                    "Authorization": f"Bearer {self.api_key}",
+                    "Content-Type": "application/json"
+                }
+                
+                response = requests.post(self.base_url, json=payload, headers=headers)
                 
                 # Parse the response and extract structured data
-                search_result = response.choices[0].message.content
+                response_data = response.json()
+                search_result = response_data['choices'][0]['message']['content']
                 results = [{"content": search_result, "url": "perplexity_search"}]
                 
                 # Initialize stock data structure
@@ -136,9 +141,9 @@ class StockSentimentAnalyzer:
             prompt = self._create_fallback_prompt(ticker, current_date, news_summary)
         
         try:
-            response = self.client.chat.completions.create(
-                model="llama-3.1-sonar-large-128k-online",
-                messages=[
+            payload = {
+                "model": "sonar",
+                "messages": [
                     {
                         "role": "system",
                         "content": self._get_system_instruction()
@@ -148,8 +153,15 @@ class StockSentimentAnalyzer:
                         "content": prompt
                     }
                 ]
-            )
-            return response.choices[0].message.content, stock_data
+            }
+            headers = {
+                "Authorization": f"Bearer {self.api_key}",
+                "Content-Type": "application/json"
+            }
+            
+            response = requests.post(self.base_url, json=payload, headers=headers)
+            response_data = response.json()
+            return response_data['choices'][0]['message']['content'], stock_data
         except Exception as e:
             return f"Error analyzing sentiment: {str(e)}", stock_data
 
