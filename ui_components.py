@@ -9,9 +9,10 @@ class UIComponents:
             @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
             
             .stApp {
-                background-color: #0A0A0A;
+                background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
                 color: #ffffff;
                 font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                overflow-x: hidden;
             }
             
             /* Hide Streamlit elements */
@@ -19,6 +20,24 @@ class UIComponents:
             footer {visibility: hidden;}
             header {visibility: hidden;}
             .stDeployButton {display: none;}
+            
+            /* Custom scrollbar */
+            ::-webkit-scrollbar {
+                width: 6px;
+            }
+            
+            ::-webkit-scrollbar-track {
+                background: transparent;
+            }
+            
+            ::-webkit-scrollbar-thumb {
+                background: rgba(255, 255, 255, 0.2);
+                border-radius: 3px;
+            }
+            
+            ::-webkit-scrollbar-thumb:hover {
+                background: rgba(255, 255, 255, 0.3);
+            }
             
             /* Center everything on the page */
             .block-container {
@@ -44,14 +63,28 @@ class UIComponents:
                 padding: 0 2rem;
             }
             
-            /* Title styling - closer to search box */
+            /* Title styling - minimal and elegant */
             .app-title {
-                font-size: 3.5rem;
-                font-weight: 300;
+                font-size: 4rem;
+                font-weight: 200;
                 color: #ffffff;
                 text-align: center;
-                margin-bottom: 1.5rem;
-                letter-spacing: -0.02em;
+                margin-bottom: 0.5rem;
+                letter-spacing: -0.03em;
+                font-family: 'Inter', sans-serif;
+                width: 100%;
+                background: linear-gradient(135deg, #ffffff 0%, #cccccc 100%);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
+            }
+            
+            .app-subtitle {
+                font-size: 1rem;
+                font-weight: 400;
+                color: #666666;
+                text-align: center;
+                margin-bottom: 3rem;
                 font-family: 'Inter', sans-serif;
                 width: 100%;
             }
@@ -81,19 +114,20 @@ class UIComponents:
             }
             
             .stTextInput > div > div > input {
-                background-color: #141414 !important;
+                background: linear-gradient(135deg, #141414 0%, #1a1a1a 100%) !important;
                 border: 1px solid #2a2a2a !important;
-                border-radius: 14px !important;
-                padding: 1.2rem 1.8rem !important;
-                font-size: 1rem !important;
+                border-radius: 16px !important;
+                padding: 1.3rem 2rem !important;
+                font-size: 1.1rem !important;
                 color: #ffffff !important;
-                height: 60px !important;
+                height: 64px !important;
                 font-family: 'Inter', sans-serif !important;
-                transition: all 0.3s ease !important;
-                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+                transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4) !important;
                 width: 100% !important;
                 text-align: left !important;
                 font-weight: 400 !important;
+                backdrop-filter: blur(10px) !important;
             }
             
             .stTextInput > div > div > input::placeholder {
@@ -104,11 +138,12 @@ class UIComponents:
             }
             
             .stTextInput > div > div > input:focus {
-                border-color: #404040 !important;
-                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(64, 64, 64, 0.5) !important;
+                border-color: #505050 !important;
+                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 0 0 2px rgba(80, 80, 80, 0.3) !important;
                 outline: none !important;
                 text-align: left !important;
-                background-color: #161616 !important;
+                background: linear-gradient(135deg, #161616 0%, #1e1e1e 100%) !important;
+                transform: translateY(-2px) !important;
             }
             
             /* Button styling - centered and minimal */
@@ -119,26 +154,27 @@ class UIComponents:
             }
             
             .stButton > button {
-                background-color: #1a1a1a !important;
+                background: linear-gradient(135deg, #1a1a1a 0%, #252525 100%) !important;
                 color: #ffffff !important;
-                border: 1px solid #2a2a2a !important;
-                border-radius: 10px !important;
-                padding: 0.8rem 1.8rem !important;
-                font-size: 0.9rem !important;
+                border: 1px solid #333333 !important;
+                border-radius: 12px !important;
+                padding: 0.9rem 2rem !important;
+                font-size: 1rem !important;
                 font-weight: 500 !important;
                 font-family: 'Inter', sans-serif !important;
-                transition: all 0.3s ease !important;
-                height: 42px !important;
-                margin-top: 1.2rem !important;
-                min-width: 130px !important;
-                box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2) !important;
+                transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+                height: 48px !important;
+                margin-top: 1.5rem !important;
+                min-width: 140px !important;
+                box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3) !important;
+                backdrop-filter: blur(10px) !important;
             }
             
             .stButton > button:hover {
-                background-color: #242424 !important;
-                border-color: #404040 !important;
-                transform: translateY(-1px) !important;
-                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+                background: linear-gradient(135deg, #252525 0%, #303030 100%) !important;
+                border-color: #505050 !important;
+                transform: translateY(-2px) !important;
+                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4) !important;
             }
             
             /* Results container - centered */
@@ -192,18 +228,33 @@ class UIComponents:
                 font-weight: 600;
             }
             
-            /* Analysis container - centered */
+            /* Analysis container - beautiful and structured */
             .analysis-content {
-                background-color: #141414;
+                background: linear-gradient(135deg, #141414 0%, #1a1a1a 100%);
                 border: 1px solid #2a2a2a;
-                border-radius: 14px;
-                padding: 2.5rem;
+                border-radius: 16px;
+                padding: 3rem;
                 margin: 2rem auto;
-                line-height: 1.7;
+                line-height: 1.8;
                 width: 100%;
-                max-width: 800px;
+                max-width: 900px;
                 text-align: left;
-                box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+                backdrop-filter: blur(10px);
+            }
+            
+            .analysis-content h2 {
+                color: #ffffff;
+                margin-top: 2.5rem;
+                margin-bottom: 1.2rem;
+                font-weight: 600;
+                font-size: 1.4rem;
+                border-bottom: 2px solid #333333;
+                padding-bottom: 0.5rem;
+            }
+            
+            .analysis-content h2:first-child {
+                margin-top: 0;
             }
             
             .analysis-content h3 {
@@ -216,8 +267,23 @@ class UIComponents:
             
             .analysis-content p, .analysis-content li {
                 color: #cccccc;
-                margin-bottom: 0.6rem;
-                font-size: 0.95rem;
+                margin-bottom: 0.8rem;
+                font-size: 1rem;
+            }
+            
+            .analysis-content strong {
+                color: #ffffff;
+                font-weight: 600;
+            }
+            
+            .analysis-content ul, .analysis-content ol {
+                margin-left: 1.5rem;
+                margin-bottom: 1rem;
+            }
+            
+            .analysis-content li {
+                margin-bottom: 0.5rem;
+                padding-left: 0.5rem;
             }
             
             /* Messages - centered */
@@ -277,32 +343,39 @@ class UIComponents:
 
     @staticmethod
     def render_header():
-        """Render the minimal header"""
+        """Render the minimal and beautiful header"""
         st.markdown("""
-        <div style="width: 100%; display: flex; justify-content: center; margin-bottom: 1.5rem;">
+        <div style="width: 100%; display: flex; flex-direction: column; align-items: center; margin-bottom: 2rem;">
             <h1 class="app-title">tradeo</h1>
+            <p class="app-subtitle">intelligent stock analysis, simplified</p>
         </div>
         """, unsafe_allow_html=True)
 
     @staticmethod
     def render_search_section():
-        """Render the minimal search section"""
+        """Render the beautiful and minimal search section"""
         st.markdown('<div class="search-wrapper">', unsafe_allow_html=True)
         
         ticker = st.text_input(
             "", 
-            placeholder="Ask anything about stocks...", 
+            placeholder="Enter any stock ticker (e.g., AAPL, TSLA, NVDA)...", 
             key="ticker_input",
             label_visibility="collapsed"
         ).upper()
         
         # Only show analyze button if there's input
         if ticker.strip():
-            col1, col2, col3 = st.columns([1, 1, 1])
+            col1, col2, col3 = st.columns([2, 1, 2])
             with col2:
-                analyze_button = st.button("Analyze", use_container_width=True)
+                analyze_button = st.button("✨ Analyze", use_container_width=True)
         else:
             analyze_button = False
+            # Show some example suggestions when empty
+            st.markdown("""
+            <div style="text-align: center; margin-top: 2rem; color: #666666; font-size: 0.9rem;">
+                <p>Try searching for: <strong>AAPL</strong>, <strong>TSLA</strong>, <strong>NVDA</strong>, <strong>GOOGL</strong></p>
+            </div>
+            """, unsafe_allow_html=True)
         
         st.markdown('</div>', unsafe_allow_html=True)
         return ticker, analyze_button
@@ -346,8 +419,10 @@ class UIComponents:
 
     @staticmethod
     def render_analysis(analysis):
-        """Render analysis in minimal style"""
-        st.markdown(f'<div class="analysis-content">{analysis}</div>', unsafe_allow_html=True)
+        """Render analysis with beautiful formatting"""
+        # Convert markdown to HTML for better styling
+        formatted_analysis = analysis.replace('\n', '<br>')
+        st.markdown(f'<div class="analysis-content">{formatted_analysis}</div>', unsafe_allow_html=True)
 
     @staticmethod
     def render_error(ticker, error_message):

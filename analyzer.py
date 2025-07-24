@@ -189,90 +189,91 @@ class StockSentimentAnalyzer:
         target_price_formatted = self.data_processor.format_currency(stock_data['target_price'])
         
         return f"""
-        **Investment Analysis for {ticker} Stock as of {current_date}**
+        Provide a comprehensive investment analysis for {ticker} stock as of {current_date}.
 
-        **Market Data:**
+        **Market Data Available:**
         • Current Price: {current_price_formatted}
         • Target Price: {target_price_formatted}
         • PE Ratio: {stock_data['pe_ratio']:.2f}
         • Recent Price Change: {stock_data['price_change']:.2f}%
         • Potential Upside: {price_potential:.2f}%
 
-        **Recent News (with References)**:
+        **Recent News Summary:**
         {news_summary}
 
-        Analyze the provided data and news to generate a detailed investment analysis. Include reference links from the news for each point using [Ref: #]. Format the response as follows:
+        Please format your response using proper markdown with the following structure:
 
-        **1. Current Market Sentiment Analysis**
-        • Sentiment: (Bullish/Bearish/Neutral)
-        • Investor Confidence: (High/Medium/Low)
-        • Explanation: [Ref: #]
+        ## 📊 Market Sentiment Analysis
+        **Sentiment:** [Bullish/Bearish/Neutral]  
+        **Investor Confidence:** [High/Medium/Low]  
+        **Key Insight:** [Brief explanation with any relevant citation]
 
-        **2. Key Recent Developments and News**
-        • Recent earnings or financial results: [Ref: #]
-        • Major announcements or developments: [Ref: #]
-        • Industry trends affecting the stock: [Ref: #]
+        ## 📈 Recent Developments  
+        - **Earnings & Financial Results:** [Latest earnings info with citation]
+        - **Major Announcements:** [Key company developments with citation]  
+        - **Industry Trends:** [Relevant sector trends with citation]
 
-        **3. Technical Analysis**
-        • Price Trend Analysis: [Ref: #]
-        • Support and Resistance Levels: [Ref: #]
-        • Key Technical Indicators: [Ref: #]
+        ## 🔍 Technical Analysis
+        - **Price Trend:** [Current trend analysis with citation]
+        - **Support/Resistance:** [Key price levels with citation]
+        - **Technical Indicators:** [Key signals with citation]
 
-        **4. Risk Assessment**
-        • Market Risks: [Ref: #]
-        • Company-Specific Risks: [Ref: #]
-        • Industry Risks: [Ref: #]
+        ## ⚠️ Risk Assessment
+        **Market Risks:** [Key market-wide risks]  
+        **Company Risks:** [Specific company risks]  
+        **Industry Risks:** [Sector-specific risks]
 
-        **5. Investment Recommendation**
-        • Rating: (BUY/SELL/HOLD)
-        • Confidence Level: (High/Medium/Low)
-        • Entry Price Range: (within 5% of {current_price_formatted})
-        • Stop Loss: (specify price)
-        • Target Price: (specify price)
-        • Investment Timeframe: (Short/Medium/Long-term)
+        ## 🎯 Investment Recommendation
+        **🏷️ Rating:** **[BUY/SELL/HOLD]**  
+        **📊 Confidence:** [High/Medium/Low]  
+        **💰 Entry Range:** [{current_price_formatted} ± 5%]  
+        **🛑 Stop Loss:** [Specific price]  
+        **🎯 Target Price:** [Specific price]  
+        **⏰ Timeframe:** [Short/Medium/Long-term]
 
-        **6. Key Reasons for Recommendation**
-        1. [Reason with reference, e.g., [Ref: 1]]
-        2. [Reason with reference, e.g., [Ref: 2]]
-        3. [Reason with reference, e.g., [Ref: 3]]
+        ## 💡 Key Investment Thesis
+        1. **[Primary reason with citation]**
+        2. **[Secondary reason with citation]** 
+        3. **[Third reason with citation]**
 
-        Ensure the response is concise, professional, and includes specific reference links where applicable.
+        Use citations like [¹], [²], [³] for references and ensure all key points are **bold** for easy scanning.
         """
 
     def _create_fallback_prompt(self, ticker, current_date, news_summary):
         """Create fallback prompt for news-only analysis"""
         return f"""
-        **Investment Analysis for {ticker} as of {current_date}**
+        Provide an investment analysis for {ticker} as of {current_date}.
 
-        Note: Market data unavailable due to API limitations.
+        **⚠️ Note:** Market data unavailable. Analysis based on news and developments only.
 
-        **Available Information (with References)**:
+        **Available Information:**
         {news_summary}
 
-        Based on the provided news, analyze the investment potential. Include reference links from the news for each point using [Ref: #]. Format the response as follows:
+        Please format your response using proper markdown:
 
-        **1. Current Market Sentiment Analysis**
-        • Sentiment: (Bullish/Bearish/Neutral)
-        • Investor Confidence: (High/Medium/Low)
-        • Explanation: [Ref: #]
+        ## 📊 Market Sentiment Analysis
+        **Sentiment:** [Bullish/Bearish/Neutral]  
+        **Investor Confidence:** [High/Medium/Low]  
+        **Key Insight:** [Brief explanation with citation]
 
-        **2. Key Recent Developments and News**
-        • Major recent developments: [Ref: #]
-        • Industry trends: [Ref: #]
-        • Market factors: [Ref: #]
+        ## 📈 Recent Developments
+        - **Major News:** [Key developments with citation]
+        - **Industry Trends:** [Relevant trends with citation]
+        - **Market Factors:** [Affecting factors with citation]
 
-        **3. General Investment Considerations**
-        • Key factors to consider: [Ref: #]
-        • Market conditions: [Ref: #]
-        • Risk factors: [Ref: #]
+        ## 🔍 Investment Considerations  
+        **Key Factors:** [Important considerations with citation]  
+        **Market Conditions:** [Current conditions with citation]  
+        **Risk Factors:** [Potential risks with citation]
 
-        **4. Recommendation**
-        • General outlook: (Positive/Negative/Neutral)
-        • Key considerations: [Ref: #]
-        • Suggested approach: [Ref: #]
+        ## 🎯 General Outlook
+        **📊 Overall Sentiment:** **[Positive/Negative/Neutral]**  
+        **💡 Key Considerations:** [Main points with citation]  
+        **📋 Suggested Approach:** [Recommended strategy with citation]
 
-        Note: Analysis based on limited data. Verify current market prices before investing.
-        Ensure the response is concise, professional, and includes specific reference links.
+        **⚠️ Disclaimer:** Analysis based on limited data. Verify current market prices before investing.
+
+        Use citations like [¹], [²], [³] for references and ensure all key points are **bold** for easy scanning.
         """
 
     def _get_system_instruction(self):
