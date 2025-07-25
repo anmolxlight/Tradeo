@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useUser, SignInButton, SignUpButton } from "@clerk/nextjs"
 import { Search, TrendingUp, BarChart3, Shield, Zap, Globe } from "lucide-react"
@@ -14,6 +14,17 @@ export default function HomePage() {
   const [error, setError] = useState("")
   const { isSignedIn, user } = useUser()
   const router = useRouter()
+
+  // Check for pending ticker when user authentication state changes
+  useEffect(() => {
+    if (isSignedIn && typeof window !== 'undefined') {
+      const pendingTicker = sessionStorage.getItem('pendingTicker')
+      if (pendingTicker) {
+        sessionStorage.removeItem('pendingTicker')
+        router.push(`/analyze/${pendingTicker}`)
+      }
+    }
+  }, [isSignedIn, router])
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
@@ -29,8 +40,10 @@ export default function HomePage() {
     if (isSignedIn) {
       router.push(`/analyze/${validation.cleanTicker}`)
     } else {
-      // Store the ticker for after authentication
-      sessionStorage.setItem('pendingTicker', validation.cleanTicker)
+      // Store the ticker for after authentication (check for SSR)
+      if (typeof window !== 'undefined') {
+        sessionStorage.setItem('pendingTicker', validation.cleanTicker)
+      }
       // Redirect to sign-in will be handled by the sign-in button
     }
   }

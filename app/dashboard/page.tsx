@@ -33,8 +33,17 @@ export default function DashboardPage() {
   useEffect(() => {
     if (user) {
       fetchAnalyses()
+      
+      // Check for pending ticker from pre-authentication search
+      if (typeof window !== 'undefined') {
+        const pendingTicker = sessionStorage.getItem('pendingTicker')
+        if (pendingTicker) {
+          sessionStorage.removeItem('pendingTicker')
+          router.push(`/analyze/${pendingTicker}`)
+        }
+      }
     }
-  }, [user])
+  }, [user, router])
 
   const fetchAnalyses = async () => {
     try {
