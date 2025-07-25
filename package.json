@@ -1,0 +1,85 @@
+{
+  "name": "tradeo-next",
+  "version": "1.0.0",
+  "description": "Intelligent stock analysis, simplified - A modern Next.js app for AI-powered stock analysis",
+  "private": true,
+  "keywords": [
+    "stock analysis",
+    "ai",
+    "trading",
+    "investment",
+    "nextjs",
+    "typescript",
+    "supabase",
+    "clerk"
+  ],
+  "author": {
+    "name": "tradeo team",
+    "email": "team@tradeo.app"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/tradeo-next.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/tradeo-next/issues"
+  },
+  "homepage": "https://tradeo.app",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "type-check": "tsc --noEmit",
+    "clean": "rm -rf .next",
+    "deploy": "npm run build && netlify deploy --prod",
+    "preview": "npm run build && npm start"
+  },
+  "dependencies": {
+    "@clerk/nextjs": "^4.29.1",
+    "@radix-ui/react-dialog": "^1.0.5",
+    "@radix-ui/react-dropdown-menu": "^2.0.6",
+    "@radix-ui/react-slot": "^1.0.2",
+    "@radix-ui/react-toast": "^1.1.5",
+    "@supabase/supabase-js": "^2.38.4",
+    "class-variance-authority": "^0.7.0",
+    "clsx": "^2.0.0",
+    "date-fns": "^3.0.6",
+    "framer-motion": "^10.16.16",
+    "lucide-react": "^0.303.0",
+    "next": "14.0.4",
+    "react": "^18",
+    "react-dom": "^18",
+    "recharts": "^2.8.0",
+    "tailwind-merge": "^2.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "@tailwindcss/postcss": "0.0.2",
+    "autoprefixer": "^10.0.1",
+    "eslint": "^8",
+    "eslint-config-next": "14.0.4",
+    "postcss": "^8",
+    "tailwindcss": "^3.3.0",
+    "typescript": "^5"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}
