@@ -23,13 +23,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: validation.message }, { status: 400 })
     }
 
-    const perplexityApiKey = process.env.PERPLEXITY_API_KEY
-    if (!perplexityApiKey) {
-      return NextResponse.json({ error: 'Perplexity API key not configured' }, { status: 500 })
+    const aiApiKey = process.env.OPENCODE_API_KEY || process.env.AI_API_KEY
+    if (!aiApiKey) {
+      return NextResponse.json({ error: 'AI API key not configured. Set OPENCODE_API_KEY or AI_API_KEY in environment.' }, { status: 500 })
     }
 
-    // Initialize analyzer and perform analysis
-    const analyzer = new StockAnalyzer(perplexityApiKey)
+    const analyzer = new StockAnalyzer(aiApiKey)
     const { stockData, analysis } = await analyzer.analyzeStock(validation.cleanTicker)
 
     // Save to database

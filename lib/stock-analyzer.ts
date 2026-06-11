@@ -1,6 +1,7 @@
-import { StockData, StockAnalysis, PerplexityResponse } from "@/types"
+import { StockData, StockAnalysis, AIResponse } from "@/types"
 
-const PERPLEXITY_API_URL = "https://api.perplexity.ai/chat/completions"
+const AI_API_BASE_URL = process.env.AI_API_BASE_URL || "https://api.opencode.ai/v1"
+const AI_MODEL = process.env.AI_MODEL || "opencode-go/deepseek-v4-flash"
 
 const STOCK_ANALYSIS_PROMPT = `You are an expert financial analyst. Analyze the given stock and provide comprehensive insights. Your response must be valid JSON only, no markdown formatting, no code blocks.
 
@@ -55,14 +56,14 @@ export class StockAnalyzer {
     const prompt = STOCK_ANALYSIS_PROMPT.replace(/{TICKER}/g, ticker.toUpperCase())
 
     try {
-      const response = await fetch(PERPLEXITY_API_URL, {
+      const response = await fetch(`${AI_API_BASE_URL}/chat/completions`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${this.apiKey}`,
         },
         body: JSON.stringify({
-          model: "sonar-pro",
+          model: AI_MODEL,
           messages: [
             {
               role: "system",
@@ -80,53 +81,49 @@ export class StockAnalyzer {
 
       if (!response.ok) {
         const errorText = await response.text()
-        console.error("Perplexity API error:", response.status, errorText)
-        
+        console.error("AI API error:", response.status, errorText)
+
         if (response.status === 401) {
-          throw new Error("Invalid Perplexity API key. Please check your configuration.")
+          throw new Error("Invalid API key. Please check your configuration.")
         }
         if (response.status === 429) {
           throw new Error("Rate limit exceeded. Please try again in a moment.")
         }
-        
+
         throw new Error(`API request failed with status ${response.status}`)
       }
 
-      const data: PerplexityResponse = await response.json()
+      const data: AIResponse = await response.json()
       const content = data.choices?.[0]?.message?.content
 
       if (!content) {
         throw new Error("No analysis received from API")
       }
 
-      // Try to parse the response as JSON
       const result = this.parseAnalysisResponse(content, ticker)
-      
+
       return {
         stockData: result.stockData as StockData,
         analysis: result.analysis as StockAnalysis,
       }
     } catch (error) {
-      if (error instanceof Error && error.message.includes("Perplexity")) {
+      if (error instanceof Error && (error.message.includes("API key") || error.message.includes("Rate limit"))) {
         throw error
       }
-      // Fall back to generated analysis if API fails
-      console.warn("API analysis failed, using fallback:", error)
+      console.warn("AI analysis failed, using fallback:", error)
       return this.generateFallbackAnalysis(ticker)
     }
   }
 
   private parseAnalysisResponse(content: string, ticker: string): { stockData: Partial<StockData>; analysis: Partial<StockAnalysis> } {
-    // Remove any markdown code block markers
     let cleanedContent = content
       .replace(/```json\n?/g, "")
       .replace(/```\n?/g, "")
       .trim()
 
-    // Find JSON boundaries
     const jsonStart = cleanedContent.indexOf("{")
     const jsonEnd = cleanedContent.lastIndexOf("}")
-    
+
     if (jsonStart === -1 || jsonEnd === -1) {
       throw new Error("Could not find valid JSON in API response")
     }
@@ -135,8 +132,7 @@ export class StockAnalyzer {
 
     try {
       const parsed = JSON.parse(cleanedContent)
-      
-      // Validate and normalize stock data
+
       const stockData: Partial<StockData> = {
         ticker: ticker.toUpperCase(),
         currentPrice: parsed.stockData?.currentPrice ?? 0,
@@ -148,7 +144,6 @@ export class StockAnalyzer {
         lastUpdated: parsed.stockData?.lastUpdated ?? new Date().toISOString(),
       }
 
-      // Validate and normalize analysis
       const analysis: Partial<StockAnalysis> = {
         ticker: ticker.toUpperCase(),
         sentiment: this.validateSentiment(parsed.analysis?.sentiment),
@@ -189,7 +184,7 @@ export class StockAnalyzer {
 
   private generateFallbackAnalysis(ticker: string): { stockData: StockData; analysis: StockAnalysis } {
     const now = new Date()
-    const isIndian = /^[A-Z0-9]{1,10}$/.test(ticker) && 
+    const isIndian = /^[A-Z0-9]{1,10}$/.test(ticker) &&
       !["AAPL", "MSFT", "GOOGL", "GOOG", "AMZN", "META", "TSLA", "NVDA", "JPM", "V", "WMT", "JNJ", "PG", "MA", "UNH", "HD", "BAC", "DIS", "ADBE", "NFLX", "CRM", "INTC", "AMD", "PYPL", "KO", "PEP"].includes(ticker.toUpperCase())
 
     return {
