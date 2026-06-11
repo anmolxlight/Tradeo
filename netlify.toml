@@ -8,12 +8,11 @@
 [build.environment]
   NEXT_PRIVATE_TARGET = "server"
 
-# Redirect rules for client-side routing
+# Redirect rules for Next.js client-side routing
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
-  conditions = {Role = ["admin"]}
 
 # Security headers
 [[headers]]
