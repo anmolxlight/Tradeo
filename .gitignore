@@ -32,7 +32,6 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
 lib64/
 parts/
 sdist/
@@ -125,3 +124,6 @@ desktop.ini
 *.rar
 *.tar
 *.zip 
+# Next.js
+.next/
+tsconfig.tsbuildinfo
