@@ -268,6 +268,23 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 
 This application is for informational purposes only and should not be considered as financial advice. Always do your own research and consult with a qualified financial advisor before making investment decisions.
 
+## 🚀 Deployment
+
+[![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/anmolxlight/Tradeo)
+
+This project is configured for Netlify deployment with `netlify.toml`. Connect your GitHub repo to Netlify and set the required environment variables:
+
+```env
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=
+CLERK_SECRET_KEY=
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
+PERPLEXITY_API_KEY=
+```
+
+See `DEPLOYMENT.md` for detailed setup instructions.
+
 ## 🙋‍♂️ Support
 
 For support, email support@tradeo.app or join our Discord community.
