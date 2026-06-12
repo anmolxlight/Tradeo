@@ -8,20 +8,19 @@ import {
   TrendingUp,
   History,
   Star,
-  Calendar,
   BarChart3,
   Plus,
   ArrowUpRight,
   ArrowDownRight,
   Clock,
-  Sparkles,
-  LayoutDashboard,
   ArrowLeft,
   ChevronRight,
+  Briefcase,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { CardSkeleton } from "@/components/ui/loading"
 import { DatabaseAnalysis } from "@/types"
 import { formatCurrency, formatPercentage, validateTicker, getRelativeTime } from "@/lib/utils"
 
@@ -36,7 +35,6 @@ export default function DashboardPage() {
   useEffect(() => {
     if (user) {
       fetchAnalyses()
-
       if (typeof window !== "undefined") {
         const pendingTicker = sessionStorage.getItem("pendingTicker")
         if (pendingTicker) {
@@ -50,12 +48,11 @@ export default function DashboardPage() {
   const fetchAnalyses = async () => {
     try {
       const response = await fetch("/api/analyze")
-      if (!response.ok) throw new Error("Failed to fetch analyses")
-
+      if (!response.ok) throw new Error("Failed to fetch")
       const data = await response.json()
       setAnalyses(data.analyses)
-    } catch (err) {
-      console.error("Error fetching analyses:", err)
+    } catch {
+      console.error("Error fetching analyses")
     } finally {
       setLoading(false)
     }
@@ -64,177 +61,144 @@ export default function DashboardPage() {
   const handleNewAnalysis = (e: React.FormEvent) => {
     e.preventDefault()
     const validation = validateTicker(searchTicker)
-
     if (!validation.isValid) {
       setError(validation.message)
       return
     }
-
     setError("")
     router.push(`/analyze/${validation.cleanTicker}`)
   }
 
-  const handleAnalysisClick = (analysis: DatabaseAnalysis) => {
-    router.push(`/analyze/${analysis.ticker}`)
-  }
-
-  const getRecommendationColor = (recommendation: string) => {
-    switch (recommendation) {
-      case "buy":
-        return "text-emerald-500 bg-emerald-500/10 border-emerald-500/20"
-      case "sell":
-        return "text-red-500 bg-red-500/10 border-red-500/20"
-      default:
-        return "text-yellow-500 bg-yellow-500/10 border-yellow-500/20"
+  const getRecommendationTag = (r: string) => {
+    switch (r) {
+      case "buy": return "tag-positive"
+      case "sell": return "tag-negative"
+      default: return "tag-neutral"
     }
   }
 
-  const getSentimentIcon = (sentiment: string) => {
-    switch (sentiment) {
-      case "bullish":
-        return <ArrowUpRight className="h-4 w-4 text-emerald-500" />
-      case "bearish":
-        return <ArrowDownRight className="h-4 w-4 text-red-500" />
-      default:
-        return <BarChart3 className="h-4 w-4 text-yellow-500" />
+  const getSentimentIndicator = (s: string) => {
+    switch (s) {
+      case "bullish": return "signal-dot-positive"
+      case "bearish": return "signal-dot-negative"
+      default: return "signal-dot-neutral"
     }
   }
 
   const stats = [
     {
-      label: "Total Analyses",
+      label: "Analyses",
       value: analyses.length,
-      icon: <BarChart3 className="h-4 w-4" />,
-      color: "text-blue-500",
-      bg: "bg-blue-500/10",
+      icon: <BarChart3 className="h-3.5 w-3.5" />,
+      color: "text-blue-400",
     },
     {
       label: "Buy Signals",
       value: analyses.filter((a) => a.analysis.recommendation === "buy").length,
-      icon: <ArrowUpRight className="h-4 w-4" />,
-      color: "text-emerald-500",
-      bg: "bg-emerald-500/10",
+      icon: <ArrowUpRight className="h-3.5 w-3.5" />,
+      color: "text-emerald-400",
     },
     {
       label: "Favorites",
       value: analyses.filter((a) => a.is_favorite).length,
-      icon: <Star className="h-4 w-4" />,
-      color: "text-yellow-500",
-      bg: "bg-yellow-500/10",
+      icon: <Star className="h-3.5 w-3.5" />,
+      color: "text-amber-400",
     },
   ]
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* ── Header ── */}
-      <header className="border-b border-border/50 bg-background/60 backdrop-blur-xl sticky top-0 z-50">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center gap-4">
-              <Button
-                onClick={() => router.push("/")}
-                variant="ghost"
-                size="sm"
-                className="btn-hover gap-2 text-muted-foreground hover:text-foreground"
-              >
-                <ArrowLeft className="h-4 w-4" />
-                <span className="hidden sm:inline">Home</span>
-              </Button>
-              <div className="flex items-center gap-2 cursor-pointer" onClick={() => router.push("/")}>
-                <TrendingUp className="h-6 w-6 text-primary" />
-                <span className="text-lg font-bold gradient-text">tradeo</span>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3">
-              <Button
-                onClick={() => router.push("/")}
-                variant="ghost"
-                size="sm"
-                className="btn-hover gap-2 text-muted-foreground hidden sm:flex"
-              >
-                <LayoutDashboard className="h-4 w-4" />
-                Home
-              </Button>
-              <UserButton
-                afterSignOutUrl="/"
-                appearance={{
-                  elements: {
-                    avatarBox: "w-8 h-8 ring-2 ring-primary/20",
-                  },
-                }}
-              />
+    <div className="min-h-screen flex flex-col">
+      {/* ── Nav ── */}
+      <nav className="sticky top-0 z-50 h-14 flex items-center border-b border-border/50 bg-background/80 backdrop-blur-xl">
+        <div className="w-full max-w-5xl mx-auto px-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => router.push("/")}
+              className="gap-1.5 text-muted-foreground"
+            >
+              <ArrowLeft className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">Home</span>
+            </Button>
+            <div className="w-px h-4 bg-border" />
+            <div
+              className="flex items-center gap-1.5 cursor-pointer"
+              onClick={() => router.push("/")}
+            >
+              <TrendingUp className="h-4 w-4 text-primary" />
+              <span className="text-sm font-semibold tracking-tight">tradeo</span>
             </div>
           </div>
+          <UserButton
+            afterSignOutUrl="/"
+            appearance={{
+              elements: {
+                avatarBox: "w-8 h-8 ring-2 ring-border",
+              },
+            }}
+          />
         </div>
-      </header>
+      </nav>
 
-      <main className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-6xl py-8 space-y-8">
+      <main className="flex-1 w-full max-w-5xl mx-auto px-4 py-6 space-y-6">
         {/* ── Welcome ── */}
         <div className="fade-in">
-          <h1 className="text-3xl sm:text-4xl font-bold gradient-text mb-2">
-            Welcome back{user?.firstName ? `, ${user.firstName}` : ""} 👋
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight mb-1">
+            Welcome back{user?.firstName ? `, ${user.firstName}` : ""}
           </h1>
-          <p className="text-muted-foreground text-base sm:text-lg">
-            Your intelligent stock analysis dashboard
+          <p className="text-sm text-muted-foreground">
+            Your stock analysis dashboard
           </p>
         </div>
 
         {/* ── New Analysis ── */}
-        <Card className="glass border-0 overflow-hidden fade-in">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
+        <Card className="fade-in">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <Plus className="h-5 w-5 text-primary" />
-              <span>New Analysis</span>
+            <CardTitle className="flex items-center gap-2">
+              <Plus className="h-4 w-4 text-primary" />
+              New Analysis
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleNewAnalysis} className="flex flex-col sm:flex-row gap-3">
+            <form onSubmit={handleNewAnalysis} className="flex gap-2">
               <div className="flex-1 relative">
-                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
                 <Input
                   type="text"
-                  placeholder="Search ticker (e.g., AAPL, RELIANCE, TSLA)"
+                  placeholder="AAPL, RELIANCE, TSLA..."
                   value={searchTicker}
                   onChange={(e) => {
                     setSearchTicker(e.target.value.toUpperCase())
                     setError("")
                   }}
-                  className="pl-10 h-12 glass focus-ring border-white/10"
+                  className="pl-9 h-10"
                   autoComplete="off"
                   autoCorrect="off"
                   spellCheck={false}
                 />
               </div>
-              <Button
-                type="submit"
-                className="btn-hover h-12 gap-2"
-                disabled={!searchTicker.trim()}
-              >
+              <Button type="submit" disabled={!searchTicker.trim()} className="gap-1.5">
                 Analyze
-                <ChevronRight className="h-4 w-4" />
+                <ChevronRight className="h-3.5 w-3.5" />
               </Button>
             </form>
-
             {error && (
-              <p className="text-red-400 text-sm mt-3 animate-slide-up">{error}</p>
+              <p className="text-destructive text-xs mt-2 animate-slide-up">{error}</p>
             )}
           </CardContent>
         </Card>
 
         {/* ── Stats ── */}
         {analyses.length > 0 && (
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 fade-in">
+          <div className="grid grid-cols-3 gap-3 fade-in">
             {stats.map((stat, i) => (
-              <Card key={i} className="glass border-0">
-                <CardContent className="p-5 flex items-center gap-4">
-                  <div className={`p-3 rounded-xl ${stat.bg}`}>
-                    <div className={stat.color}>{stat.icon}</div>
-                  </div>
+              <Card key={i}>
+                <CardContent className="p-4 flex items-center gap-3">
+                  <div className={`${stat.color}`}>{stat.icon}</div>
                   <div>
-                    <div className={`text-2xl font-bold ${stat.color}`}>{stat.value}</div>
-                    <div className="text-sm text-muted-foreground">{stat.label}</div>
+                    <div className="text-lg font-bold tabular">{stat.value}</div>
+                    <div className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium">{stat.label}</div>
                   </div>
                 </CardContent>
               </Card>
@@ -242,46 +206,35 @@ export default function DashboardPage() {
           </div>
         )}
 
-        {/* ── Analysis History ── */}
-        <div className="space-y-5 fade-in">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xl sm:text-2xl font-semibold flex items-center gap-2">
-              <History className="h-5 w-5 text-primary" />
-              <span>Analysis History</span>
-            </h2>
+        {/* ── History ── */}
+        <div className="space-y-4 fade-in">
+          <div className="flex items-center gap-2">
+            <History className="h-4 w-4 text-primary" />
+            <h2 className="text-base font-semibold">Analysis History</h2>
           </div>
 
           {loading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
               {[...Array(6)].map((_, i) => (
-                <Card key={i} className="glass border-0 overflow-hidden">
-                  <CardContent className="p-0">
-                    <div className="p-6 space-y-3">
-                      <div className="skeleton h-4 w-1/3 rounded" />
-                      <div className="skeleton h-8 w-2/3 rounded" />
-                      <div className="skeleton h-4 w-full rounded" />
-                      <div className="skeleton h-4 w-1/2 rounded" />
-                    </div>
-                  </CardContent>
-                </Card>
+                <CardSkeleton key={i} />
               ))}
             </div>
           ) : analyses.length === 0 ? (
-            <Card className="glass border-0">
-              <CardContent className="py-16 text-center">
-                <div className="inline-flex p-4 rounded-2xl bg-primary/10 mb-4">
-                  <BarChart3 className="h-10 w-10 text-primary" />
+            <Card>
+              <CardContent className="py-14 text-center">
+                <div className="inline-flex p-3 rounded-lg bg-secondary mb-3">
+                  <Briefcase className="h-8 w-8 text-muted-foreground" />
                 </div>
-                <h3 className="text-xl font-semibold mb-2">No analyses yet</h3>
-                <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-                  Start analyzing stocks to see your history here. Your insights and recommendations will be saved automatically.
+                <h3 className="text-base font-semibold mb-1">No analyses yet</h3>
+                <p className="text-sm text-muted-foreground mb-5 max-w-sm mx-auto">
+                  Search for a stock ticker above to get your first AI-powered analysis.
                 </p>
                 <Button
                   onClick={() => {
                     const input = document.querySelector('input[type="text"]') as HTMLInputElement
                     input?.focus()
                   }}
-                  className="btn-hover gap-2"
+                  gap="1.5"
                 >
                   <Search className="h-4 w-4" />
                   Analyze a Stock
@@ -289,70 +242,58 @@ export default function DashboardPage() {
               </CardContent>
             </Card>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {analyses.map((analysis) => (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              {analyses.map((a) => (
                 <Card
-                  key={analysis.id}
-                  className="glass border-0 card-hover cursor-pointer group"
-                  onClick={() => handleAnalysisClick(analysis)}
+                  key={a.id}
+                  className="card-interactive cursor-pointer"
+                  onClick={() => router.push(`/analyze/${a.ticker}`)}
                 >
-                  <CardContent className="p-5 space-y-4">
+                  <CardContent className="p-4 space-y-3">
                     {/* Header */}
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <span className="text-lg font-bold text-primary tracking-tight">
-                          {analysis.ticker}
-                        </span>
+                        <span className="text-sm font-bold tracking-tight">{a.ticker}</span>
                         <div className="flex items-center gap-1">
-                          {getSentimentIcon(analysis.analysis.sentiment)}
-                          <span className="text-xs text-muted-foreground capitalize">
-                            {analysis.analysis.sentiment}
+                          <div className={`signal-dot ${getSentimentIndicator(a.analysis.sentiment)}`} />
+                          <span className="text-[10px] text-muted-foreground capitalize">
+                            {a.analysis.sentiment}
                           </span>
                         </div>
                       </div>
-
-                      {analysis.is_favorite && (
-                        <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
+                      {a.is_favorite && (
+                        <Star className="h-3.5 w-3.5 text-amber-400 fill-amber-400" />
                       )}
                     </div>
 
                     {/* Price */}
                     <div className="flex items-baseline justify-between">
-                      <span className="text-2xl font-bold tabular-nums">
-                        {formatCurrency(
-                          analysis.stock_data.currentPrice,
-                          analysis.stock_data.currency
-                        )}
+                      <span className="text-xl font-bold tabular">
+                        {formatCurrency(a.stock_data.currentPrice, a.stock_data.currency)}
                       </span>
                       <span
-                        className={`text-sm font-medium tabular-nums ${
-                          analysis.stock_data.priceChange >= 0
-                            ? "text-emerald-500"
-                            : "text-red-500"
+                        className={`text-xs font-medium tabular ${
+                          a.stock_data.priceChange >= 0 ? "num-positive" : "num-negative"
                         }`}
                       >
-                        {formatPercentage(analysis.stock_data.priceChange)}
+                        {formatPercentage(a.stock_data.priceChange)}
                       </span>
                     </div>
 
                     {/* Tags */}
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span
-                        className={`px-2.5 py-1 rounded-lg text-xs font-semibold uppercase tracking-wider border ${getRecommendationColor(
-                          analysis.analysis.recommendation
-                        )}`}
-                      >
-                        {analysis.analysis.recommendation}
+                    <div className="flex items-center gap-1.5">
+                      <span className={`tag ${getRecommendationTag(a.analysis.recommendation)}`}>
+                        {a.analysis.recommendation}
                       </span>
-                      <span className="text-xs text-muted-foreground bg-white/5 px-2.5 py-1 rounded-lg capitalize">
-                        {analysis.analysis.riskLevel} risk
+                      <span className="tag tag-default capitalize">
+                        {a.analysis.riskLevel} risk
                       </span>
                     </div>
 
                     {/* Meta */}
-                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground pt-1 border-t border-white/5">
-                      <Clock className="h-3.5 w-3.5" />
-                      <span>{getRelativeTime(analysis.created_at)}</span>
+                    <div className="flex items-center gap-1 text-[10px] text-muted-foreground/70 pt-1 border-t border-border/30">
+                      <Clock className="h-3 w-3" />
+                      <span>{getRelativeTime(a.created_at)}</span>
                     </div>
                   </CardContent>
                 </Card>

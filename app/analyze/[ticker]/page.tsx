@@ -14,10 +14,11 @@ import {
   Clock,
   Star,
   RefreshCw,
-  Sparkles,
   ChevronRight,
   Building2,
   Activity,
+  Shield,
+  Sparkles,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -47,21 +48,16 @@ export default function AnalyzePage() {
   const analyzeStock = async (stockTicker: string) => {
     setLoading(true)
     setError("")
-
     try {
       const response = await fetch("/api/analyze", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ticker: stockTicker }),
       })
-
       if (!response.ok) {
         const errorData = await response.json()
         throw new Error(errorData.error || "Failed to analyze stock")
       }
-
       const result = await response.json()
       setData(result)
     } catch (err) {
@@ -71,101 +67,60 @@ export default function AnalyzePage() {
     }
   }
 
-  const getSentimentColor = (sentiment: string) => {
-    switch (sentiment) {
-      case "bullish":
-        return "text-emerald-500"
-      case "bearish":
-        return "text-red-500"
-      default:
-        return "text-yellow-500"
+  const sentimentConfig = (s: string) => {
+    switch (s) {
+      case "bullish": return { color: "text-emerald-400", bg: "bg-emerald-500/10 border-emerald-500/20", icon: <TrendingUp className="h-4 w-4" />, dot: "signal-dot-positive" }
+      case "bearish": return { color: "text-red-400", bg: "bg-red-500/10 border-red-500/20", icon: <TrendingDown className="h-4 w-4" />, dot: "signal-dot-negative" }
+      default: return { color: "text-amber-400", bg: "bg-amber-500/10 border-amber-500/20", icon: <BarChart3 className="h-4 w-4" />, dot: "signal-dot-neutral" }
     }
   }
 
-  const getSentimentBg = (sentiment: string) => {
-    switch (sentiment) {
-      case "bullish":
-        return "bg-emerald-500/10 border-emerald-500/20"
-      case "bearish":
-        return "bg-red-500/10 border-red-500/20"
-      default:
-        return "bg-yellow-500/10 border-yellow-500/20"
+  const recommendationConfig = (r: string) => {
+    switch (r) {
+      case "buy": return "tag-positive"
+      case "sell": return "tag-negative"
+      default: return "tag-neutral"
     }
   }
 
-  const getSentimentIcon = (sentiment: string) => {
-    switch (sentiment) {
-      case "bullish":
-        return <TrendingUp className="h-5 w-5" />
-      case "bearish":
-        return <TrendingDown className="h-5 w-5" />
-      default:
-        return <BarChart3 className="h-5 w-5" />
+  const riskConfig = (r: string) => {
+    switch (r) {
+      case "low": return { color: "text-emerald-400", bg: "bg-emerald-500/10" }
+      case "high": return { color: "text-red-400", bg: "bg-red-500/10" }
+      default: return { color: "text-amber-400", bg: "bg-amber-500/10" }
     }
   }
 
-  const getRecommendationColor = (recommendation: string) => {
-    switch (recommendation) {
-      case "buy":
-        return "bg-emerald-500/15 text-emerald-400 border-emerald-500/25 ring-1 ring-emerald-500/20"
-      case "sell":
-        return "bg-red-500/15 text-red-400 border-red-500/25 ring-1 ring-red-500/20"
-      default:
-        return "bg-yellow-500/15 text-yellow-400 border-yellow-500/25 ring-1 ring-yellow-500/20"
-    }
-  }
-
-  const getRiskColor = (riskLevel: string) => {
-    switch (riskLevel) {
-      case "low":
-        return "text-emerald-500"
-      case "high":
-        return "text-red-500"
-      default:
-        return "text-yellow-500"
-    }
-  }
-
-  const getRiskBg = (riskLevel: string) => {
-    switch (riskLevel) {
-      case "low":
-        return "bg-emerald-500/10"
-      case "high":
-        return "bg-red-500/10"
-      default:
-        return "bg-yellow-500/10"
-    }
-  }
-
+  // ── Loading State ──
   if (loading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center space-y-6 max-w-md mx-auto px-4">
-          <div className="flex justify-center space-x-2">
-            <div className="w-3 h-3 bg-primary rounded-full pulse-dot"></div>
-            <div className="w-3 h-3 bg-primary rounded-full pulse-dot"></div>
-            <div className="w-3 h-3 bg-primary rounded-full pulse-dot"></div>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center space-y-5 max-w-xs mx-auto px-4">
+          <div className="flex justify-center gap-1.5">
+            <div className="w-2 h-2 bg-primary rounded-full pulse-dot" />
+            <div className="w-2 h-2 bg-primary rounded-full pulse-dot" />
+            <div className="w-2 h-2 bg-primary rounded-full pulse-dot" />
           </div>
-          <div className="space-y-2">
-            <p className="text-lg font-semibold">
+          <div className="space-y-1">
+            <p className="text-sm font-medium">
               Analyzing <span className="text-primary">{ticker}</span>
             </p>
-            <p className="text-sm text-muted-foreground">
-              Gathering real-time data and generating AI-powered insights...
+            <p className="text-xs text-muted-foreground">
+              Gathering market data and running AI analysis...
             </p>
           </div>
-          <div className="space-y-2 text-sm text-muted-foreground">
-            <div className="flex items-center justify-center gap-2 animate-pulse">
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-center gap-1.5 animate-pulse text-xs text-muted-foreground">
               <div className="w-1.5 h-1.5 bg-blue-500 rounded-full" />
-              <span>Market data</span>
+              Market data
             </div>
-            <div className="flex items-center justify-center gap-2 animate-pulse" style={{ animationDelay: "200ms" }}>
-              <div className="w-1.5 h-1.5 bg-green-500 rounded-full" />
-              <span>Financial metrics</span>
+            <div className="flex items-center justify-center gap-1.5 animate-pulse text-xs text-muted-foreground" style={{ animationDelay: "200ms" }}>
+              <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full" />
+              Financial metrics
             </div>
-            <div className="flex items-center justify-center gap-2 animate-pulse" style={{ animationDelay: "400ms" }}>
-              <div className="w-1.5 h-1.5 bg-purple-500 rounded-full" />
-              <span>AI insights</span>
+            <div className="flex items-center justify-center gap-1.5 animate-pulse text-xs text-muted-foreground" style={{ animationDelay: "400ms" }}>
+              <div className="w-1.5 h-1.5 bg-violet-500 rounded-full" />
+              AI insights
             </div>
           </div>
         </div>
@@ -173,31 +128,25 @@ export default function AnalyzePage() {
     )
   }
 
+  // ── Error State ──
   if (error) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center px-4">
-        <Card className="glass border-0 max-w-md w-full">
-          <CardContent className="p-8 text-center space-y-5">
-            <div className="inline-flex p-4 rounded-2xl bg-red-500/10">
-              <AlertTriangle className="h-10 w-10 text-red-500" />
+      <div className="min-h-screen flex items-center justify-center px-4">
+        <Card className="max-w-sm w-full">
+          <CardContent className="p-6 text-center space-y-4">
+            <div className="inline-flex p-3 rounded-lg bg-destructive/10">
+              <AlertTriangle className="h-7 w-7 text-destructive" />
             </div>
-            <h3 className="text-xl font-semibold">Analysis Failed</h3>
-            <p className="text-muted-foreground text-sm">{error}</p>
-            <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
-              <Button
-                onClick={() => router.push("/")}
-                variant="outline"
-                className="glass gap-2"
-              >
-                <ArrowLeft className="h-4 w-4" />
-                Back Home
+            <h3 className="text-base font-semibold">Analysis Failed</h3>
+            <p className="text-sm text-muted-foreground">{error}</p>
+            <div className="flex gap-2 justify-center">
+              <Button variant="outline" onClick={() => router.push("/")} gap="1.5">
+                <ArrowLeft className="h-3.5 w-3.5" />
+                Home
               </Button>
-              <Button
-                onClick={() => analyzeStock(ticker as string)}
-                className="btn-hover gap-2"
-              >
-                <RefreshCw className="h-4 w-4" />
-                Try Again
+              <Button onClick={() => analyzeStock(ticker as string)} gap="1.5">
+                <RefreshCw className="h-3.5 w-3.5" />
+                Retry
               </Button>
             </div>
           </CardContent>
@@ -206,109 +155,100 @@ export default function AnalyzePage() {
     )
   }
 
-  if (!data) {
-    return null
-  }
+  if (!data) return null
 
   const { stockData, analysis } = data
+  const sentiment = sentimentConfig(analysis.sentiment)
+  const risk = riskConfig(analysis.riskLevel)
 
   const metrics = [
     {
       label: "Current Price",
       value: formatCurrency(stockData.currentPrice, stockData.currency),
-      icon: <DollarSign className="h-5 w-5 text-blue-500" />,
-      bg: "from-blue-500/20 to-blue-600/5",
+      icon: <DollarSign className="h-4 w-4 text-blue-400" />,
     },
     {
       label: "Target Price",
-      value:
-        stockData.targetPrice > 0
-          ? formatCurrency(stockData.targetPrice, stockData.currency)
-          : "N/A",
-      icon: <Target className="h-5 w-5 text-emerald-500" />,
-      bg: "from-emerald-500/20 to-emerald-600/5",
+      value: stockData.targetPrice > 0 ? formatCurrency(stockData.targetPrice, stockData.currency) : "N/A",
+      icon: <Target className="h-4 w-4 text-emerald-400" />,
     },
     {
       label: "PE Ratio",
       value: stockData.peRatio > 0 ? stockData.peRatio.toFixed(2) : "N/A",
-      icon: <Activity className="h-5 w-5 text-purple-500" />,
-      bg: "from-purple-500/20 to-purple-600/5",
+      icon: <Activity className="h-4 w-4 text-violet-400" />,
     },
     {
       label: "Change",
       value: formatPercentage(stockData.priceChange),
-      icon: <Clock className="h-5 w-5 text-amber-500" />,
-      bg: "from-amber-500/20 to-amber-600/5",
-      valueColor: stockData.priceChange >= 0 ? "text-emerald-500" : "text-red-500",
+      icon: <Clock className="h-4 w-4 text-amber-400" />,
+      valueClass: stockData.priceChange >= 0 ? "num-positive" : "num-negative",
     },
   ]
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* ── Header ── */}
-      <header className="border-b border-border/50 bg-background/60 backdrop-blur-xl sticky top-0 z-50">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-6xl">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center gap-4">
-              <Button
-                onClick={() => router.push("/dashboard")}
-                variant="ghost"
-                size="sm"
-                className="btn-hover gap-2 text-muted-foreground hover:text-foreground"
-              >
-                <ArrowLeft className="h-4 w-4" />
-                <span className="hidden sm:inline">Dashboard</span>
-              </Button>
-              <div className="flex items-center gap-2 cursor-pointer" onClick={() => router.push("/")}>
-                <TrendingUp className="h-6 w-6 text-primary" />
-                <span className="text-lg font-bold gradient-text hidden sm:inline">
-                  tradeo
-                </span>
-              </div>
-            </div>
-
+    <div className="min-h-screen flex flex-col">
+      {/* ── Nav ── */}
+      <nav className="sticky top-0 z-50 h-14 flex items-center border-b border-border/50 bg-background/80 backdrop-blur-xl">
+        <div className="w-full max-w-5xl mx-auto px-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
             <Button
-              onClick={() => router.push("/dashboard")}
-              variant="outline"
+              variant="ghost"
               size="sm"
-              className="glass gap-2"
+              onClick={() => router.push("/dashboard")}
+              className="gap-1.5 text-muted-foreground"
             >
-              Dashboard
-              <ChevronRight className="h-4 w-4" />
+              <ArrowLeft className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">Dashboard</span>
             </Button>
+            <div className="w-px h-4 bg-border" />
+            <div
+              className="flex items-center gap-1.5 cursor-pointer"
+              onClick={() => router.push("/")}
+            >
+              <TrendingUp className="h-4 w-4 text-primary" />
+              <span className="text-sm font-semibold tracking-tight hidden sm:inline">tradeo</span>
+            </div>
           </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => router.push("/dashboard")}
+            gap="1.5"
+          >
+            Dashboard
+            <ChevronRight className="h-3.5 w-3.5" />
+          </Button>
         </div>
-      </header>
+      </nav>
 
-      <main className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-6xl py-8 space-y-8">
+      <main className="flex-1 w-full max-w-5xl mx-auto px-4 py-6 space-y-5">
         {/* ── Stock Header ── */}
-        <div className="fade-in space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="fade-in space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
             <div className="space-y-1">
-              <div className="flex items-center gap-3">
-                <div className="inline-flex p-2.5 rounded-xl bg-primary/10">
-                  <Building2 className="h-5 w-5 text-primary" />
+              <div className="flex items-center gap-2.5">
+                <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-secondary">
+                  <Building2 className="h-4 w-4 text-muted-foreground" />
                 </div>
-                <h1 className="text-3xl sm:text-4xl font-bold gradient-text">
-                  {stockData.ticker}
-                </h1>
-                <span className="text-xs text-muted-foreground bg-white/5 px-2 py-1 rounded-md">
-                  {stockData.isIndian ? "NSE/BSE" : "NASDAQ/NYSE"}
-                </span>
+                <div>
+                  <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">{stockData.ticker}</h1>
+                  <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
+                    <Clock className="h-3 w-3" />
+                    {new Date(stockData.lastUpdated).toLocaleString()}
+                    <span className="text-border">|</span>
+                    <span>{stockData.isIndian ? "NSE/BSE" : "NASDAQ/NYSE"}</span>
+                  </div>
+                </div>
               </div>
-              <p className="text-sm text-muted-foreground flex items-center gap-1.5">
-                <Clock className="h-3.5 w-3.5" />
-                Last updated: {new Date(stockData.lastUpdated).toLocaleString()}
-              </p>
             </div>
 
             <div className="text-right">
-              <div className="text-3xl sm:text-4xl font-bold tabular-nums">
+              <div className="text-2xl sm:text-3xl font-bold tabular">
                 {formatCurrency(stockData.currentPrice, stockData.currency)}
               </div>
               <div
-                className={`text-lg font-medium tabular-nums ${
-                  stockData.priceChange >= 0 ? "text-emerald-500" : "text-red-500"
+                className={`text-sm font-medium tabular ${
+                  stockData.priceChange >= 0 ? "num-positive" : "num-negative"
                 }`}
               >
                 {formatPercentage(stockData.priceChange)}
@@ -316,25 +256,17 @@ export default function AnalyzePage() {
             </div>
           </div>
 
-          {/* Key Metrics */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
-            {metrics.map((metric, i) => (
-              <Card
-                key={i}
-                className="glass border-0 card-hover"
-                style={{ animationDelay: `${i * 80}ms` }}
-              >
-                <CardContent className="p-4 text-center space-y-2">
-                  <div className={`inline-flex p-2 rounded-lg bg-gradient-to-br ${metric.bg}`}>
-                    {metric.icon}
-                  </div>
-                  <div className="text-xs text-muted-foreground">{metric.label}</div>
-                  <div
-                    className={`text-base sm:text-lg font-semibold tabular-nums ${
-                      metric.valueColor || ""
-                    }`}
-                  >
-                    {metric.value}
+          {/* ── Metrics ── */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+            {metrics.map((m, i) => (
+              <Card key={i} className="fade-in" style={{ animationDelay: `${i * 50}ms` }}>
+                <CardContent className="p-3.5 flex items-center gap-3">
+                  <div className="flex-shrink-0">{m.icon}</div>
+                  <div className="min-w-0">
+                    <div className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium">{m.label}</div>
+                    <div className={`text-sm font-semibold tabular truncate ${m.valueClass || ""}`}>
+                      {m.value}
+                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -342,31 +274,24 @@ export default function AnalyzePage() {
           </div>
         </div>
 
-        {/* ── Analysis Content ── */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* ── Content ── */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
           {/* Main: AI Analysis */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* AI Analysis Card */}
-            <Card className="glass border-0 overflow-hidden fade-in">
-              <div className="absolute top-0 right-0 w-48 h-48 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
+          <div className="lg:col-span-2 space-y-5">
+            {/* Analysis */}
+            <Card className="accent-line fade-in">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-lg">
-                  <Sparkles className="h-5 w-5 text-primary" />
-                  <span>AI Analysis</span>
-                  <span
-                    className={`ml-auto flex items-center gap-1.5 text-xs font-normal px-2.5 py-1 rounded-full border ${getSentimentBg(
-                      analysis.sentiment
-                    )}`}
-                  >
-                    {getSentimentIcon(analysis.sentiment)}
-                    <span className={`capitalize ${getSentimentColor(analysis.sentiment)}`}>
-                      {analysis.sentiment}
-                    </span>
+                <CardTitle className="flex items-center gap-2">
+                  <Sparkles className="h-4 w-4 text-primary" />
+                  AI Analysis
+                  <span className={`ml-auto flex items-center gap-1.5 tag ${sentiment.bg} border`}>
+                    <div className={`signal-dot ${sentiment.dot}`} />
+                    <span className={sentiment.color}>{analysis.sentiment}</span>
                   </span>
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-foreground leading-relaxed whitespace-pre-line text-sm sm:text-base">
+                <div className="text-sm text-foreground/90 leading-relaxed whitespace-pre-line">
                   {analysis.analysis}
                 </div>
               </CardContent>
@@ -374,21 +299,21 @@ export default function AnalyzePage() {
 
             {/* Key Points */}
             {analysis.keyPoints.length > 0 && (
-              <Card className="glass border-0 fade-in">
+              <Card className="fade-in">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-lg">
-                    <BarChart3 className="h-5 w-5 text-primary" />
-                    <span>Key Insights</span>
+                  <CardTitle className="flex items-center gap-2">
+                    <BarChart3 className="h-4 w-4 text-primary" />
+                    Key Insights
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <ul className="space-y-3">
-                    {analysis.keyPoints.map((point, index) => (
-                      <li key={index} className="flex items-start gap-3">
-                        <div className="flex-shrink-0 w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center mt-0.5">
+                  <ul className="space-y-2.5">
+                    {analysis.keyPoints.map((point, i) => (
+                      <li key={i} className="flex items-start gap-2.5">
+                        <div className="flex-shrink-0 w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center mt-px">
                           <div className="w-1.5 h-1.5 bg-primary rounded-full" />
                         </div>
-                        <span className="text-sm sm:text-base text-foreground">{point}</span>
+                        <span className="text-sm text-foreground/85 leading-relaxed">{point}</span>
                       </li>
                     ))}
                   </ul>
@@ -398,51 +323,37 @@ export default function AnalyzePage() {
           </div>
 
           {/* Sidebar */}
-          <div className="space-y-6">
+          <div className="space-y-5">
             {/* Recommendation */}
-            <Card className="glass border-0 fade-in">
+            <Card className="fade-in">
               <CardHeader>
-                <CardTitle className="text-lg">Recommendation</CardTitle>
+                <CardTitle>Recommendation</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-5">
-                <div
-                  className={`px-5 py-4 rounded-xl border text-center font-bold uppercase tracking-wider text-base ${getRecommendationColor(
-                    analysis.recommendation
-                  )}`}
-                >
-                  {analysis.recommendation}
+              <CardContent className="space-y-4">
+                <div className={`tag ${recommendationConfig(analysis.recommendation)} w-full justify-center py-2 text-sm`}>
+                  {analysis.recommendation.toUpperCase()}
                 </div>
 
-                <div className="space-y-3 divide-y divide-white/5">
+                <div className="space-y-3 divide-y divide-border/30">
                   <div className="flex justify-between items-center pb-3">
-                    <span className="text-sm text-muted-foreground">Sentiment</span>
-                    <span
-                      className={`text-sm font-semibold capitalize flex items-center gap-1.5 ${getSentimentColor(
-                        analysis.sentiment
-                      )}`}
-                    >
-                      {getSentimentIcon(analysis.sentiment)}
+                    <span className="text-xs text-muted-foreground">Sentiment</span>
+                    <span className={`flex items-center gap-1.5 text-xs font-medium ${sentiment.color}`}>
+                      <div className={`signal-dot ${sentiment.dot}`} />
                       {analysis.sentiment}
                     </span>
                   </div>
 
                   <div className="flex justify-between items-center py-3">
-                    <span className="text-sm text-muted-foreground">Risk Level</span>
-                    <span
-                      className={`text-sm font-semibold capitalize px-2.5 py-1 rounded-lg ${getRiskBg(
-                        analysis.riskLevel
-                      )} ${getRiskColor(analysis.riskLevel)}`}
-                    >
+                    <span className="text-xs text-muted-foreground">Risk Level</span>
+                    <span className={`text-xs font-medium px-2 py-0.5 rounded ${risk.bg} ${risk.color}`}>
                       {analysis.riskLevel}
                     </span>
                   </div>
 
                   {analysis.timeHorizon && (
                     <div className="flex justify-between items-center pt-3">
-                      <span className="text-sm text-muted-foreground">Time Horizon</span>
-                      <span className="text-sm font-semibold capitalize">
-                        {analysis.timeHorizon}
-                      </span>
+                      <span className="text-xs text-muted-foreground">Time Horizon</span>
+                      <span className="text-xs font-medium capitalize">{analysis.timeHorizon}</span>
                     </div>
                   )}
                 </div>
@@ -450,44 +361,34 @@ export default function AnalyzePage() {
             </Card>
 
             {/* Actions */}
-            <Card className="glass border-0 fade-in">
-              <CardContent className="p-4 space-y-3">
+            <Card className="fade-in">
+              <CardContent className="p-4 space-y-2">
                 <Button
                   onClick={() => analyzeStock(ticker as string)}
-                  className="w-full btn-hover gap-2"
+                  className="w-full gap-1.5"
                   disabled={loading}
                 >
-                  <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
+                  <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />
                   Refresh Analysis
                 </Button>
-
                 <Button
                   variant="outline"
-                  className="w-full glass gap-2"
+                  className="w-full gap-1.5"
                   onClick={() => router.push("/dashboard")}
                 >
-                  <Star className="h-4 w-4" />
+                  <Star className="h-3.5 w-3.5" />
                   View History
                 </Button>
               </CardContent>
             </Card>
 
             {/* Disclaimer */}
-            <Card className="glass border-0 bg-amber-500/5 border-amber-500/10 fade-in">
-              <CardContent className="p-4">
-                <div className="flex items-start gap-3">
-                  <AlertTriangle className="h-5 w-5 text-amber-500 flex-shrink-0 mt-0.5" />
-                  <div className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                    <p className="font-medium text-amber-500 mb-1">Disclaimer</p>
-                    <p>
-                      This analysis is for informational purposes only and should not be considered
-                      as financial advice. Always do your own research and consult with a financial
-                      advisor before making investment decisions.
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <div className="flex items-start gap-2 px-1 fade-in">
+              <Shield className="h-3.5 w-3.5 text-muted-foreground/50 flex-shrink-0 mt-0.5" />
+              <p className="text-[10px] text-muted-foreground/60 leading-relaxed">
+                For informational purposes only. Not financial advice. Always do your own research before investing.
+              </p>
+            </div>
           </div>
         </div>
       </main>
