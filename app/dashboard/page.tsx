@@ -234,7 +234,7 @@ export default function DashboardPage() {
                     const input = document.querySelector('input[type="text"]') as HTMLInputElement
                     input?.focus()
                   }}
-                  gap="1.5"
+                 
                 >
                   <Search className="h-4 w-4" />
                   Analyze a Stock

@@ -140,11 +140,11 @@ export default function AnalyzePage() {
             <h3 className="text-base font-semibold">Analysis Failed</h3>
             <p className="text-sm text-muted-foreground">{error}</p>
             <div className="flex gap-2 justify-center">
-              <Button variant="outline" onClick={() => router.push("/")} gap="1.5">
+              <Button variant="outline" onClick={() => router.push("/")}>
                 <ArrowLeft className="h-3.5 w-3.5" />
                 Home
               </Button>
-              <Button onClick={() => analyzeStock(ticker as string)} gap="1.5">
+              <Button onClick={() => analyzeStock(ticker as string)}>
                 <RefreshCw className="h-3.5 w-3.5" />
                 Retry
               </Button>
@@ -213,7 +213,7 @@ export default function AnalyzePage() {
             variant="outline"
             size="sm"
             onClick={() => router.push("/dashboard")}
-            gap="1.5"
+           
           >
             Dashboard
             <ChevronRight className="h-3.5 w-3.5" />
